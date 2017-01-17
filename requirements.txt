@@ -1,0 +1,4 @@
+scapy
+ecdsa
+pyx==0.12.1
+crypto
