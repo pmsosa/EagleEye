@@ -53,15 +53,15 @@ CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.o: CMakeFiles/dot11decrypt.dir/flag
 CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.o: ../dot11decrypt.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/mint/Desktop/CS284/dot11decrypt-master/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.o -c /home/mint/Desktop/CS284/dot11decrypt-master/dot11decrypt.cpp
+	/usr/bin/g++-4.8   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.o -c /home/mint/Desktop/CS284/dot11decrypt-master/dot11decrypt.cpp
 
 CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/mint/Desktop/CS284/dot11decrypt-master/dot11decrypt.cpp > CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.i
+	/usr/bin/g++-4.8  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/mint/Desktop/CS284/dot11decrypt-master/dot11decrypt.cpp > CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.i
 
 CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/mint/Desktop/CS284/dot11decrypt-master/dot11decrypt.cpp -o CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.s
+	/usr/bin/g++-4.8  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/mint/Desktop/CS284/dot11decrypt-master/dot11decrypt.cpp -o CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.s
 
 CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.o.requires:
 .PHONY : CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.o.requires
@@ -81,7 +81,7 @@ dot11decrypt_EXTERNAL_OBJECTS =
 
 dot11decrypt: CMakeFiles/dot11decrypt.dir/dot11decrypt.cpp.o
 dot11decrypt: CMakeFiles/dot11decrypt.dir/build.make
-dot11decrypt: /home/mint/Desktop/CS284/libtins-master/build/lib/libtins.so.3.4
+dot11decrypt: /usr/local/lib/libtins.so.3.4
 dot11decrypt: /usr/lib/i386-linux-gnu/libpcap.so
 dot11decrypt: /usr/lib/i386-linux-gnu/libssl.so
 dot11decrypt: /usr/lib/i386-linux-gnu/libcrypto.so

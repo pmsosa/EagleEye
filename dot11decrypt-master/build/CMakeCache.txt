@@ -25,24 +25,27 @@ CMAKE_BUILD_TYPE:STRING=
 CMAKE_COLOR_MAKEFILE:BOOL=ON
 
 //CXX compiler.
-CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++-4.8
+
+//Path to a program.
+CMAKE_CXX_COMPILER_WITH_PATH:FILEPATH=/usr/bin/g++-4.8
 
 //Flags used by the compiler during all build types.
 CMAKE_CXX_FLAGS:STRING=
 
 //Flags used by the compiler during debug builds.
-CMAKE_CXX_FLAGS_DEBUG:STRING=-g
+CMAKE_CXX_FLAGS_DEBUG:STRING=
 
 //Flags used by the compiler during release minsize builds.
-CMAKE_CXX_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG
+CMAKE_CXX_FLAGS_MINSIZEREL:STRING=
 
 //Flags used by the compiler during release builds (/MD /Ob1 /Oi
 // /Ot /Oy /Gs will produce slightly less optimized but smaller
 // files).
-CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+CMAKE_CXX_FLAGS_RELEASE:STRING=
 
 //Flags used by the compiler during Release with Debug Info builds.
-CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
+CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=
 
 //C compiler.
 CMAKE_C_COMPILER:FILEPATH=/usr/bin/cc
@@ -177,7 +180,7 @@ dot11decrypt_BINARY_DIR:STATIC=/home/mint/Desktop/CS284/dot11decrypt-master/buil
 dot11decrypt_SOURCE_DIR:STATIC=/home/mint/Desktop/CS284/dot11decrypt-master
 
 //The directory containing a CMake configuration file for libtins.
-libtins_DIR:PATH=/home/mint/Desktop/CS284/libtins-master/build
+libtins_DIR:PATH=/usr/local/CMake
 
 
 ########################
@@ -208,6 +211,8 @@ CMAKE_CPACK_COMMAND:INTERNAL=/usr/bin/cpack
 CMAKE_CTEST_COMMAND:INTERNAL=/usr/bin/ctest
 //ADVANCED property for variable: CMAKE_CXX_COMPILER
 CMAKE_CXX_COMPILER-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_CXX_COMPILER_WITH_PATH
+CMAKE_CXX_COMPILER_WITH_PATH-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_CXX_FLAGS
 CMAKE_CXX_FLAGS-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_CXX_FLAGS_DEBUG
