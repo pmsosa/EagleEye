@@ -1,4 +1,0 @@
-sudo airmon-ng start wlan0
-sudo airodump-ng -c [CHANNEL] --bssid [BSSID] mon0
-sudo ./dot11decrypt mon0 'wpa:TP-LINK_58F4:71697550'
-

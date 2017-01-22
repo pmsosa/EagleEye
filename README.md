@@ -10,11 +10,22 @@ Run the following commands to install prerequisites:
 ```
 apt-get update
 sudo apt-get install python python-pip libboost-all-dev libpcap-dev libssl-dev cmake g++ 
-pip install -r requirements.txt
+sudo -H pip install -r requirements.txt
 ```
 You will also need:
  - libtins: https://github.com/mfontanini/libtins
  - dot11decrypt: https://github.com/mfontanini/dot11decrypt
+
+<h3>How to Run</h3>
+Tested with following Environment:
+- OS: Linux Mint 17.2 'Rafaela' (Mate 32-bit)
+- Wireless Adapter: TP-Link TL-WN722N (High Gain 150Mbps) [wlan1]
+- Make sure you have all the required packages described above.
+
+Running program:
+- Change the necessary values (AP Name, Interface Name) in setup.sh (and possibly main.py's main function)
+- Run setup.sh
+- Run main.py
 
 <h3>Overall Idea</h3>
 - First we put our wireless interface in promiscuos mode (meaning it is authenticated to an AP, but we can still read all the other packets from other authenticated users to the same AP).
