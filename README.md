@@ -24,8 +24,8 @@ Tested with following Environment:
 
 Running program:
 - Change the necessary values (AP Name, Interface Name) in setup.sh (and possibly main.py's main function)
-- Run setup.sh
-- Run main.py
+- Run ```./setup.sh```
+- Run ```sudo python backend.py```
 
 <h3>Overall Idea</h3>
 - First we put our wireless interface in promiscuos mode (meaning it is authenticated to an AP, but we can still read all the other packets from other authenticated users to the same AP).

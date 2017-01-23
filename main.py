@@ -1,5 +1,5 @@
 from scapy.all import *
-import time, copy
+import time, copy, requests, jsonpickle
 
 timestep = 5 # 5 Seconds (Equivalent to the granularity of the graphs)
 
@@ -109,10 +109,12 @@ class Dataset:
                 self.clients += [Client(packet.dst)]
             else:
                 #Dangreous (but I don't want to do linear search each time)
-                self.clients[self.clients_names.index(packet.src)].record_packet(packet)
+                self.clients[self.clients_names.index(packet.dst)].record_packet(packet)
         
                 if (self.debug):
                     self.print_debuggin_info()
+
+                #self.upload_data(self,"http://localhost:1993/setdata")
 
         except Exception, e:
                 print "ERROR:",e
@@ -125,10 +127,15 @@ class Dataset:
             print " ",c.report[len(c.report)-1]
             print " "
 
+    def upload_data(self,url):
+        r = requests.post(url,headers={'Content-type':'application/json'},data=jsonpickle.encode(self))
+
+
 
 if __name__ == "__main__":
     dataset = Dataset(debug=True)
-    dataset.ap_find(5,"mon0")
+    dataset.ap_find(3,"mon0")
+    dataset.upload_data("http://localhost:1993/setdata")
     print dataset.APs
     dataset.sniff(30,"tap0")
 
