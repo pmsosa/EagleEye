@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Eagle Eye</title>
+
+    <meta name="description" content="Home Wi-Fi Monitoring">
+    <meta name="author" content="Eagle Eye Team">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+	<link rel="shortcut icon" type="image/png" href="/img/favicon.png"/>
+
+
+	<script src="js\jquery-1.12.0.min.js"></script>
+	<script src="js\bootstrap.min.js"></script>
+	<script src="js\Chart.bundle.min.js"></script>
+	<script src="js\calls.js"></script>
+</head>
+
+<body>
+	<!-- Pay attention to width/height params. its the only way to force chart sizing -->
+	<div style="max-width:200px; max-height:200px">
+		<canvas id="myChart" width="200" height="200"></canvas>
+	</div>
+
+</body>
+
+
+
+</html>
+
+
+
+<script>
+
+//Example of how to create a data chart (EVENTUALLY MOVE THIS TO SEPARATE .js FILE)
+
+var colors = {'red':"#FF0000", 'black':"#000000",'yellow':'#FFFF00','blue':'#0000FF','green':'#008000'}
+
+var data = {
+	datasets: [{
+	        label: 'Host 1',
+	        data: [{ x: -10, y: 0 }, { x: 0, y: 10 }, { x: 10, y: 5 }],
+	        fill: false,
+	        borderColor: colors.red
+	    	},
+	    	{
+	    	label: 'Host 2',
+	        data: [{ x: -5, y: 0 }, { x: 5, y: 10 }, { x: 0, y: 5 }],
+	        fill: false,
+	        borderColor: colors.blue
+	    	}
+	    	]
+}
+
+var options = {
+        scales: {
+            xAxes: [{
+                type: 'linear',
+                position: 'bottom'
+            }]
+        }
+    }
+
+var myLineChart = new Chart("myChart", {
+    type: 'line',
+    data: data,
+    options: options
+});
+
+// data = {
+// 	datasets: [{
+// 	        label: 'Scatter Dataset',
+// 	        data: [{
+// 	            x: -10,
+// 	            y: 0
+// 	        }, {
+// 	            x: 0,
+// 	            y: 5
+// 	        }, {
+// 	            x: 10,
+// 	            y: 5
+// 	        }]
+// 	    }]
+// }
+
+// var myLineChart = new Chart("myChart", {
+//     type: 'line',
+//     data: data,
+//     options: options,
+//     responsive: true,
+//     maintainAspectRatio: false
+// });
+
+//function
+
+</script>
