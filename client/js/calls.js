@@ -18,6 +18,22 @@ function getAllData(){
 
 
 
+function addClient(){
+	//Add a Client
+}
+
+function refreshGraph(graph_id, datapoints){
+	//Refresh a graph with new datapoints
+}
+
+
+
+function setup(){
+	//Setup
+	//
+}
+
+
 //This schedules the getAllData to be ran every 5 sec.
 window.setInterval(getAllData, 5000);
 

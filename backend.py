@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 
 
-TESTING = False #If set to true there will be no data collection just fake data
+TESTING = True #If set to true there will be no data collection just fake data
 
 dataset = Dataset()
 
@@ -46,6 +46,7 @@ def home():
 # All API Calls                                                #
 ################################################################
 
+# Returns the Dataset Structure
 @app.route('/getalldataset')
 def get_data():
     global dataset
@@ -54,6 +55,7 @@ def get_data():
 
     return resp
 
+# Updates the Dataset Structure
 @app.route('/setdata',methods=['POST'])
 def add_data():
     global dataset
@@ -63,7 +65,14 @@ def add_data():
     dataset = jsonpickle.decode(content)
     return "OK"
 
+# User specifies WLAN name and password
+@app.route('/setup/<SSID>/<PASS>',methods=['GET'])
+def setup(SSID,PASS):
+    #TODO
+    return 0
 
+
+# Is server up or not?
 @app.route('/alive',methods=['GET'])
 def alive():
     print "Here be dragons..."

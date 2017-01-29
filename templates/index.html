@@ -24,10 +24,121 @@
 </head>
 
 <body>
-	<!-- Pay attention to width/height params. its the only way to force chart sizing -->
-	<div style="max-width:200px; max-height:200px">
-		<canvas id="myChart" width="200" height="200"></canvas>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-default navbar-static-top" role="navigation">
+	<div class="navbar-header">
+		 
+		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+			 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+		</button> <a class="navbar-brand">🦅 Eagle Eye</a>
 	</div>
+	
+	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+		<ul class="nav navbar-nav">
+			<li class="active">
+				<a href="#">Link</a>
+			</li>
+			<li class="dropdown">
+				 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown<strong class="caret"></strong></a>
+				<ul class="dropdown-menu">
+					<li>
+						<a href="#">Action</a>
+					</li>
+					<li>
+						<a href="#">Another action</a>
+					</li>
+					<li>
+						<a href="#">Something else here</a>
+					</li>
+					<li class="divider">
+					</li>
+					<li>
+						<a href="#">Separated link</a>
+					</li>
+					<li class="divider">
+					</li>
+					<li>
+						<a href="#">One more separated link</a>
+					</li>
+				</ul>
+			</li>
+		</ul>
+		<form class="navbar-form navbar-right" style="padding-right: 3%" role="search">
+			<div class="form-group">
+				<input id="setup_ap" type="text" class="form-control" placeholder="Access Point Name"/>
+				<input id="setup_pass" type="password" class="form-control" placeholder="Password"/>
+			</div> 
+			<button id="setup_btn" type="submit" onclick="setup()" class="btn btn-default">
+				Setup
+			</button>
+		</form>
+	</div>
+	
+</nav>
+
+
+
+	<!-- Pay attention to width/height params. its the only way to force chart sizing -->
+
+
+	<!-- Main Overall Network Info Section -->
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-6">
+				<table class="table" style="background-color:#f1f1f1">
+					<tr><th colspan="2" style="text-align: center;">Basic Information</th></tr>
+					<tr><th>AP:</th><td>Pretty Fly For a WiFi</td></tr>
+					<tr><th>Est. Usage:</th><td>20%</td></tr>
+					<tr><th>BSSID:</th><td>FF:32:2A:23:44</td></tr>
+					<tr><th>Channel:</th><td>11</td></tr>
+				</table>
+			</div>
+			<div class="col-sm-6">
+				<div>
+					<canvas id="myChart"></canvas>
+				</div>
+			</div>
+		</div>
+
+		<!-- Client Header -->
+
+		<div class="col-md-12">
+		<hr>
+			
+				<h3 align="center">
+					Clients
+				</h3>
+			
+		<hr>
+		</div>
+		
+
+		<!-- Specific Client Info Section -->
+		<div id="client_list">
+			<!-- This is the template that the add_client function will copy/paste for each new client [style="display: none"] -->
+			<div id="template_client_infobox" class="row">
+				<div class="col-sm-6">
+					<table class="table" style="background-color:#f9f9f9">
+						<tr><th colspan="2" style="text-align: center;">Client #1</th></tr>
+						<tr><th>MAC:</th><td>CE:90:AB:76:34</td></tr>
+						<tr><th>IP:</th><td>192.168.0.11</td></tr>
+						<tr><th>OS:</th><td>Windows</td></tr>
+						<tr><th>Est. Usage:</th><td>11</td></tr>
+					</table
+fa
+>				</div>
+				<div class="col-sm-6">
+					<div>
+						<canvas id="myChart2"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+
 
 </body>
 
@@ -48,13 +159,15 @@ var data = {
 	        label: 'Host 1',
 	        data: [{ x: -10, y: 0 }, { x: 0, y: 10 }, { x: 10, y: 5 }],
 	        fill: false,
-	        borderColor: colors.red
+	        borderColor: colors.red,
+	        pointRadius: 1
 	    	},
 	    	{
 	    	label: 'Host 2',
-	        data: [{ x: -5, y: 0 }, { x: 5, y: 10 }, { x: 0, y: 5 }],
+	        data: [{ x: -5, y: 0 }, { x: 1, y: 10 }, { x: 6, y: 5 }],
 	        fill: false,
-	        borderColor: colors.blue
+	        borderColor: colors.blue,
+	        pointRadius: 1
 	    	}
 	    	]
 }
@@ -69,6 +182,12 @@ var options = {
     }
 
 var myLineChart = new Chart("myChart", {
+    type: 'line',
+    data: data,
+    options: options
+});
+
+var myLineChart = new Chart("myChart2", {
     type: 'line',
     data: data,
     options: options
