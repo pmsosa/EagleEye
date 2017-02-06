@@ -117,20 +117,22 @@
 		<!-- Specific Client Info Section -->
 		<div id="client_list">
 			<!-- This is the template that the add_client function will copy/paste for each new client [style="display: none"] -->
-			<div id="template_client_infobox" class="row">
-				<div class="col-sm-6">
-					<table class="table" style="background-color:#f9f9f9">
-						<tr><th colspan="2" style="text-align: center;">Client #1</th></tr>
-						<tr><th>MAC:</th><td>CE:90:AB:76:34</td></tr>
-						<tr><th>IP:</th><td>192.168.0.11</td></tr>
-						<tr><th>OS:</th><td>Windows</td></tr>
-						<tr><th>Est. Usage:</th><td>11</td></tr>
-					</table
-fa
->				</div>
-				<div class="col-sm-6">
-					<div>
-						<canvas id="myChart2"></canvas>
+			<div id="template_client_infobox" style="display:none">
+				<div id="XXXX_clientbox" class="row">
+					<div class="col-sm-6">
+						<table class="table" style="background-color:#f9f9f9">
+							<tr><th colspan="2" style="text-align: center;" id="XXXX_name">XXNAMEXX</th></tr>
+							<tr><th>MAC:</th><td id="XXXX_mac">XXMACXX</td></tr>
+							<tr><th>IP:</th><td id="XXXX_ip">XXIPXX</td></tr>
+							<tr><th>OS:</th><td id="XXXX_os">XXOSXX</td></tr>
+							<tr><th>Est. Usage:</th><td id="XXXX_usage">XXUSAGEXX</td></tr>
+						</table
+	fa
+	>				</div>
+					<div class="col-sm-6">
+						<div>
+							<canvas id="clientChartX"></canvas>
+						</div>
 					</div>
 				</div>
 			</div>

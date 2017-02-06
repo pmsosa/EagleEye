@@ -1,5 +1,7 @@
 from scapy.all import *
 import time, copy, requests, jsonpickle
+import sys
+
 
 timestep = 5 # 5 Seconds (Equivalent to the granularity of the graphs)
 
@@ -8,15 +10,18 @@ timestep = 5 # 5 Seconds (Equivalent to the granularity of the graphs)
 class Client:
 
     windowsize = timestep
+    
     template = {'timestamp': None, 'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'http': 0,'https': 0}
+    #template = {'timestamp': None, 'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'type':{}}
+    # Timewindow must be "static" among clients so the points on the graph match nicely.
+    last_timestamp = [time.time(),time.ctime()] # [Millisecs,Timestamp]
 
     def __init__(self,mac,ip="",name="",os="",debug=False):
-        self.last_timestamp = [time.time(),time.ctime()] # [Millisecs,Timestamp]
         self.mac = mac   # MAC
         self.ip = ""     # IP
         self.name = ""   # Gotten by Nmap Sweep
         self.os = ""     # Mac, Linux, Windows, Other, N/A
-        self.report = [[self.last_timestamp[0],copy.deepcopy(self.template)]] # Probably a list of dictionaries [{'timestamp':'9:00:00','https':'20%','udp':'80%'},...]
+        self.report = [[Client.last_timestamp[0],copy.deepcopy(self.template)]] # Probably a list of dictionaries [{'timestamp':'9:00:00','https':'20%','udp':'80%'},...]
         self.debug = debug
 
     def record_packet(self,packet):
@@ -27,20 +32,20 @@ class Client:
             print self.report
         
 
-        if (t < self.last_timestamp[0] + self.windowsize):
+        if (t < Client.last_timestamp[0] + self.windowsize):
             if self.debug: print ">> In Window!"
             #Packet is inside window size
             element = self.report[len(self.report)-1][1] #This is a shallow copy        
             
         else:
-            self.last_timestamp = [time.time(),time.ctime()]
+            Client.last_timestamp = [time.time(),time.ctime()]
             if self.debug: print "<< Out of Window!"
             #Packet is outside of window size   
             element = copy.deepcopy(self.template)
-            node = [self.last_timestamp[0], element]
+            node = [Client.last_timestamp[0], element]
             self.report += [node] #This is still a shallow appending
 
-        # { 'timestamp': ,'sent':, 'recieved':,'http':,'udp':...}
+        # { 'timestamp': ,'sent':, 'recieved':,'type':['80':'443':...etc.]}
         if self.debug:
             print element
             print "-----------------------"
@@ -56,6 +61,13 @@ class Client:
         #Application Layer (HTTP, HTTPS)
         if (packet.sport == 443): element["https"] += 1
         elif (packet.sport == 80): element["http"] = 1
+
+        #Keep packets in dict type
+        #try:
+            #If this crashes then entry for this port doesn't exist, so we must create it.
+        #    element["type"][str(packet.sport)] += 1
+        #except:
+        #    element["type"][str(packet.sport)] = 1
 
 ### Data Storage ###
 class Dataset:
@@ -133,11 +145,59 @@ class Dataset:
 
 
 if __name__ == "__main__":
+    
+    mode  = -1  # Capture Mode 1 = Find APs | 2 = Packet Capture | 3 = All (Do both 1&2) 
+    iface = "mon0"  # Interface Name
+    iface2 = "tap1"  # Interface Name #2 (for When doing both AP and Packet Capture)
+
     dataset = Dataset(debug=True)
-    dataset.ap_find(3,"mon0")
-    dataset.upload_data("http://localhost:1993/setdata")
+    url = "http://localhost:1992/setdata"
+    dataset.ap_find(3,iface)
+    dataset.upload_data(url)
     print dataset.APs
-    dataset.sniff(30,"tap0")
+    dataset.sniff(30,iface2)
+    print "Done sniffing!"
+    dataset.upload_data(url)
+
+    # #Read Arguments
+    # if (len(sys.argv) < 3):
+    #     print "Usage:"
+    #     print "List APs: main.py list-ap mon0"
+    #     print "Packet Capture: main.py packet-capture tap0"
+    #     print "Both:  main.py all mon0 tap0"
+    #     sys.exit()
+    
+    # mode = sys.argv[1]
+    # iface = sys.argv[2]
+    # if (mode == "all"): iface2 = sys.argv[3]
+    
+    # print "Starting mode:",sys.argv[1],"on interface:",iface,iface2
+    
+    
+    # #### Actually run Program
+    # dataset = Dataset(debug=True)
+    # url = "http://localhost:1993/setdata"
+    
+    # if (mode == "list-ap"):
+    #     dataset.ap_find(3,iface)
+    #     dataset.upload_data(url)
+    #     print dataset.APs    
+    
+    # elif (mode == "packet-capture"):
+    #     dataset.sniff(30,iface)
+    
+    # elif (mode == "all"): 
+    #     dataset.ap_find(3,iface)
+    #     dataset.upload_data(url)
+    #     print dataset.APs
+    #     dataset.sniff(30,iface2)
+        
+    # else:
+    #     print "Usage: main.py [capture mode] [interface name]"
+    #     print "Capture Modes: list-ap, packet-capture, all"
+    #     sys.exit()
+    
+
 
 #def packet_callback(packet):
 #    print "Packet going to:", packet.dst
