@@ -161,7 +161,15 @@
 var myLineChart = new Chart("myChart", {
     type: 'line',
     data: chartdata,
-    options: options
+    options: {
+        scales: {
+            xAxes: [{
+                type: 'linear',
+                position: 'bottom'
+            }]
+        },
+        animation: false
+    }
 });
 
 // var myLineChart = new Chart("myChart2", {

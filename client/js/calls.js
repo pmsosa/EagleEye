@@ -25,14 +25,34 @@ chartdata = {
 }
 
 options = {
-        scales: {
-            xAxes: [{
-                type: 'linear',
-                position: 'bottom'
-            }]
-        },
-        animation: false
-    }
+	scales: {
+		xAxes:[{
+			type: 'time',
+    		position: 'bottom',
+			scaleLabel:{
+				display:true,
+				labelString:"Time"
+			},
+			time:{
+				displayFormats:{
+					millisecond: "h:mm:ss",
+					second: "h:mm:ss",
+					minute: "h:mm:ss",
+					hour: "h:mm:ss"
+				}
+			}
+		}],
+		yAxes:[{
+			scaleLabel:{
+				display:true,
+				labelString:"# of Packets"
+			}
+		}]
+	},
+	// scaleOverride: true,
+    animation: false
+}	
+
 
 //Function call to get the the data from the ../getalldataset endpoint in flask
 function getAllData(){
@@ -96,8 +116,6 @@ function refreshClientGraphs(data){
   			sentpoints = []
   			recvpoints = []
 
-
-
 			for (j = 0; j < clients[i]["report"].length; j++){
 				report = clients[i]["report"]
 				//X-Axis
@@ -110,7 +128,6 @@ function refreshClientGraphs(data){
 				//console.info(report)
 			}
 
-  			console.log(sentpoints)
 	  		chartdata = {
 				datasets: [
 							{label: 'Sent',
@@ -123,58 +140,9 @@ function refreshClientGraphs(data){
 					        data: recvpoints,
 					        fill: false,
 					        borderColor: colors.blue,
-					        pointRadius: 1}
+					        pointRadius: 3}
 				    	]
 			}
-
-			options = {
-				scales: {
-					xAxes:[{
-						type: 'time',
-                		position: 'bottom',
-						scaleLabel:{
-							display:true,
-							labelString:"Time"
-						},
-						time:{
-							displayFormats:{
-								millisecond: "h:mm:ss",
-								second: "h:mm:ss",
-								minute: "h:mm:ss",
-								hour: "h:mm:ss"
-							}
-						}
-					}],
-					yAxes:[{
-						scaleLabel:{
-							display:true,
-							labelString:"# of Packets"
-						}
-					}]
-				},
-				// scaleOverride: true,
-		  //       scales: {
-		  //           xAxes: [{
-		  //           	scaleSteps:1,
-				// 		scaleStepWidth: 10,
-		  //               type: 'time',
-		  //               position: 'bottom',
-		                // time:{
-		                // 	format: "h:mm:ss a",
-		                // 	unit: "second",
-		                // 	displayFormats:{
-		                // 		second: "h:mm:ss a",
-		                // 	}
-			                //min: (new Date((new Date()).getHours()-1)),
-			                //max: (new Date((new Date()).getHours()+1))
-		        //         }
-
-		        //     }]
-		        // },
-		        animation: false
-		    }	
-
-
 
 			new Chart(clients[i].mac+"_chart", {
 		    type: 'line',
@@ -186,11 +154,48 @@ function refreshClientGraphs(data){
 		//Chart Type: 1 - UDP/TCP
 		else if (chart_type[clients[i].mac] == 1){
 
+			udppoints = []
+			tcppoints = []
+
+			for (j = 0; j < clients[i]["report"].length; j++){
+				report = clients[i]["report"]
+				//X-Axis
+				time = new Date(report[j][0]*1000)
+				//time = time.getHours()*100+ time.getMinutes()+(time.getSeconds()/100)
+				console.log(report)
+				//Y-Axis
+				udppoints.push({x: time, y: report[j][1]["udp"]})
+				tcppoints.push({x: time, y: report[j][1]["tcp"]})
+				//console.info(report)
+			}
+
+	  		chartdata = {
+				datasets: [
+							{label: 'UDP',
+					        data: udppoints,
+					        fill: false,
+					        borderColor: colors.red,
+					        pointRadius: 3},
+
+					    	{label: 'TCP',
+					        data: tcppoints,
+					        fill: false,
+					        borderColor: colors.blue,
+					        pointRadius: 3}
+				    	]
+			}
+
+						new Chart(clients[i].mac+"_chart", {
+		    type: 'line',
+		    data: chartdata,
+		    options: options
+			});
 		}
 		
 		//Chart Type: 3 - Portwise Chart
 		else if (chart_type[clients[i].mac] == 2){
-
+			//DO THIS PORTWISE
+			//PICK TOP PORTS, otherwise it'll be impossible to read.
 		}
 
 		//Chart Type: 4 - Portwise Chart
