@@ -131,7 +131,7 @@
 	>				</div>
 					<div class="col-sm-6">
 						<div>
-							<canvas id="clientChartX"></canvas>
+							<canvas id="XXXX_chart"></canvas>
 						</div>
 					</div>
 				</div>
@@ -154,46 +154,21 @@
 
 //Example of how to create a data chart (EVENTUALLY MOVE THIS TO SEPARATE .js FILE)
 
-var colors = {'red':"#FF0000", 'black':"#000000",'yellow':'#FFFF00','blue':'#0000FF','green':'#008000'}
 
-var data = {
-	datasets: [{
-	        label: 'Host 1',
-	        data: [{ x: -10, y: 0 }, { x: 0, y: 10 }, { x: 10, y: 5 }],
-	        fill: false,
-	        borderColor: colors.red,
-	        pointRadius: 1
-	    	},
-	    	{
-	    	label: 'Host 2',
-	        data: [{ x: -5, y: 0 }, { x: 1, y: 10 }, { x: 6, y: 5 }],
-	        fill: false,
-	        borderColor: colors.blue,
-	        pointRadius: 1
-	    	}
-	    	]
-}
 
-var options = {
-        scales: {
-            xAxes: [{
-                type: 'linear',
-                position: 'bottom'
-            }]
-        }
-    }
+
 
 var myLineChart = new Chart("myChart", {
     type: 'line',
-    data: data,
+    data: chartdata,
     options: options
 });
 
-var myLineChart = new Chart("myChart2", {
-    type: 'line',
-    data: data,
-    options: options
-});
+// var myLineChart = new Chart("myChart2", {
+//     type: 'line',
+//     data: data,
+//     options: options
+// });
 
 // data = {
 // 	datasets: [{
