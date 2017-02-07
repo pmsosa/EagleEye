@@ -21,6 +21,8 @@
 	<script src="js\bootstrap.min.js"></script>
 	<script src="js\Chart.bundle.min.js"></script>
 	<script src="js\calls.js"></script>
+
+
 </head>
 
 <body>
@@ -84,8 +86,8 @@
 
 	<!-- Main Overall Network Info Section -->
 	<div class="container">
-		<div class="row">
-			<div class="col-sm-6">
+		<div class="row-md-12" style="border-radius:25px">
+			<div class="col-sm-4">
 				<table class="table" style="background-color:#f1f1f1">
 					<tr><th colspan="2" style="text-align: center;">Basic Information</th></tr>
 					<tr><th>AP:</th><td>Pretty Fly For a WiFi</td></tr>
@@ -94,16 +96,18 @@
 					<tr><th>Channel:</th><td>11</td></tr>
 				</table>
 			</div>
-			<div class="col-sm-6">
+			<div class="col-sm-7">
 				<div>
 					<canvas id="myChart"></canvas>
 				</div>
 			</div>
 		</div>
 
-		<!-- Client Header -->
 
-		<div class="col-md-12">
+	</div>
+		<!-- Client Header -->
+	<div class="container">
+		<div class="row">
 		<hr>
 			
 				<h3 align="center">
@@ -112,32 +116,38 @@
 			
 		<hr>
 		</div>
+	</div>
 		
-
+	<div class="container">
 		<!-- Specific Client Info Section -->
-		<div id="client_list">
+		<div id="client_list" style="display:block">
 			<!-- This is the template that the add_client function will copy/paste for each new client [style="display: none"] -->
 			<div id="template_client_infobox" style="display:none">
-				<div id="XXXX_clientbox" class="row">
-					<div class="col-sm-6">
-						<table class="table" style="background-color:#f9f9f9">
+				<hr>
+				<div id="XXXX_clientbox" style="background-color:#f6f6f6; border-radius:25px" class="row">
+					<div class="col-sm-4">
+						<table class="table" style="background-color:#f6f6f6">
 							<tr><th colspan="2" style="text-align: center;" id="XXXX_name">XXNAMEXX</th></tr>
 							<tr><th>MAC:</th><td id="XXXX_mac">XXMACXX</td></tr>
 							<tr><th>IP:</th><td id="XXXX_ip">XXIPXX</td></tr>
 							<tr><th>OS:</th><td id="XXXX_os">XXOSXX</td></tr>
 							<tr><th>Est. Usage:</th><td id="XXXX_usage">XXUSAGEXX</td></tr>
-						</table
-	fa
-	>				</div>
+						</table>				
+					</div>
 					<div class="col-sm-6">
 						<div>
 							<canvas id="XXXX_chart"></canvas>
 						</div>
 					</div>
+					<div class="col-sm-2">
+						<label align="center">Graphs</label>
+						<button id="XXXX_toggle_0" class="btn btn-default" style="width:100%">Usage</button>
+						<button id="XXXX_toggle_1" class="btn btn-default" style="width:100%">Pkt. Type</button>
+						<button id="XXXX_toggle_2" class="btn btn-default" style="width:100%">Ports</button>
+					</div>
 				</div>
 			</div>
 		</div>
-
 
 	</div>
 
