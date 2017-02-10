@@ -27,8 +27,10 @@ Running program:
 - Run ```./setup.sh```
 - Run ```sudo python backend.py```
 - You should be able to go to localhost:1992 and see a website being hosted there.
+- On the website you should be able to simply select your AP and password and hit "monitor"
+- Then a short 30 second packet capture will start. The timing of this packet capture can be modified in packetCapture.py
 
-Running without actually capturing simply change ```TESTING=False``` in backend.py and follow the steps above.
+~~Running without actually capturing simply change ```TESTING=False``` in backend.py and follow the steps above.~~ (Broke this as of dc31579; We should create a method for feeding fake data to our backend. Perhaps a separate script similar to packetCapture.py that can be fed a pcap file).
 
 
 
