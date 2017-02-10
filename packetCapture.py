@@ -1,7 +1,6 @@
 from scapy.all import *
 import time, copy, requests, jsonpickle
 import sys
-from IPython import embed
 
 url = "http://localhost:1992"
 endpoint = "setPacketCaptr"

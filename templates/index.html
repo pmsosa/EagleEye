@@ -33,46 +33,38 @@
 		 
 		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
 			 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
-		</button> <a class="navbar-brand">🦅 Eagle Eye</a>
+		</button> 
+
+		<a class="navbar-brand"><img src="/img/favicon.png" style="height:100%; display:inline;"></img> Eagle Eye</a>
+		<!-- 🦅 -->
 	</div>
 	
 	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 		<ul class="nav navbar-nav">
 			<li class="active">
-				<a href="#">Link</a>
+				<a href="#">Dashboard</a>
 			</li>
 			<li class="dropdown">
-				 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown<strong class="caret"></strong></a>
+				 <a href="#" class="dropdown-toggle" data-toggle="dropdown">About<strong class="caret"></strong></a>
 				<ul class="dropdown-menu">
 					<li>
-						<a href="#">Action</a>
+						<a href="#">Help</a>
 					</li>
 					<li>
-						<a href="#">Another action</a>
-					</li>
-					<li>
-						<a href="#">Something else here</a>
-					</li>
-					<li class="divider">
-					</li>
-					<li>
-						<a href="#">Separated link</a>
-					</li>
-					<li class="divider">
-					</li>
-					<li>
-						<a href="#">One more separated link</a>
+						<a href="#">Contact</a>
 					</li>
 				</ul>
 			</li>
 		</ul>
 		<form class="navbar-form navbar-right" style="padding-right: 3%" role="search">
 			<div class="form-group">
-				<input id="setup_ap" type="text" class="form-control" placeholder="Access Point Name"/>
+				<select class="form-control" id="setup_ap">
+					<option value="" disabled selected hidden>Select Access Point</option>
+				</select>
 				<input id="setup_pass" type="password" class="form-control" placeholder="Password"/>
 			</div> 
-			<button id="setup_btn" type="submit" onclick="setup()" class="btn btn-default">
-				Setup
+			<button id="setup_btn" type="button" onclick="start_monitor();" class="btn btn-default">
+				Monitor
 			</button>
 		</form>
 	</div>
@@ -83,9 +75,16 @@
 
 	<!-- Pay attention to width/height params. its the only way to force chart sizing -->
 
+	<!-- AP Help-->
+	<div id="AP_help" class="container" style="display:block">
+		<div class="alert alert-info fade in">
+			<!-- <a href="#" class="close" data-dismiss="alert">&times;</a> -->
+			<strong>To start monitoring</strong> please input Access Point name and Password above, and click on "Monitor" to begin wireless network monitoring.
+		</div>
+	</div>
 
 	<!-- Main Overall Network Info Section -->
-	<div class="container">
+	<div id="total_container" class="container" style="display:none">
 		<div class="row-md-12" style="border-radius:25px">
 			<div class="col-sm-4">
 				<table class="table" style="background-color:#f1f1f1">
@@ -106,7 +105,7 @@
 
 	</div>
 		<!-- Client Header -->
-	<div class="container">
+	<div id="client_header" class="container" style="display:none">
 		<div class="row">
 		<hr>
 			

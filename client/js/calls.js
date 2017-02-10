@@ -1,8 +1,11 @@
 /// CONSTANTS ///
 var getData_endpoint = "../getalldataset"	//This is the endpoint called to get information from flask
+var startMon_endpoint = "../start_monitor"  //This is the endpoing called to start the monitoring process
+
 var dataset = [] 	//This is the dataset object that will be acessed by getAllData
 var colors = {'red':"#FF0000", 'black':"#000000",'yellow':'#FFFF00','blue':'#0000FF','green':'#008000'} //List of colors for our graphs
 var chart_type = {'main':'usage'} //This dictionary specifies which type of graph we have set up initially for each chart.
+
 /// FUNCTIONS ///
 
 ///TEMPORARY BULLSHIT
@@ -54,29 +57,90 @@ options = {
 }	
 
 
+//Update the AP Bar to display the possible APs
+function AP_update(data){
+    var ap_bar = document.getElementById("setup_ap");
+    for (i = 0; i < data.APs.length; i++){
+        option = document.createElement("option");
+        option.text = data.APs[i].name;
+        ap_bar.add(option);
+    }
+    mode = "wait"
+}
+
+//Start monitoring (When user clicks on monitor button)
+function start_monitor(){
+    ap = document.getElementById("setup_ap")
+    ap = ap.options[ap.selectedIndex].text
+    pass = document.getElementById("setup_pass").value
+    console.log("Start Monitoring on "+ap+" "+pass)
+
+    monitor_info = {"bssid":ap,"password":pass}
+    $.ajax(startMon_endpoint,{
+        data: JSON.stringify(monitor_info),
+        contentType: "application/json",
+        type: "POST"
+    });
+
+
+    $("#setup_ap").prop('disabled',true)
+    $("#setup_pass").prop('disabled',true)
+    $("#setup_btn").prop('disabled',true)
+
+
+    return false;
+}
+
+//Make chart areas visible for monitor mode
+function prep_monitor_mode(){
+    document.getElementById("total_container").style.display = "block";
+    document.getElementById("client_header").style.display = "block";
+    document.getElementById("AP_help").style.display = "none";
+}
+
+
 //Function call to get the the data from the ../getalldataset endpoint in flask
 function getAllData(){
 	$.get( getData_endpoint, function( data ) {
-	  console.log(data);
+		console.log(data);
 
-	  //Check if we need to add any more clients to the website.
-	  if ((dataset.clients == undefined) || (data.clients.length > dataset.clients.length)){
-	  	n = 0
-	  	if (dataset.clients != undefined){ n = dataset.clients.length}
+		//INIT MODE - Still not doing packet Capturing
+		if (data.mode == "init"){
+            //Avoid overfilling the dropdown for AP selection
+            if (document.getElementById("setup_ap").options.length <= 1){
+                AP_update(data);
+            }
+		}
+        //MONITOR MODE - Capturing mode
+		else{
 
-	  	for (i = n; i < data.clients.length; i++){
-			addClient(data.clients[i])
-			console.log("Created: "+data.clients[i].mac)	
-	  	}
+          //If we are switching from AP select to monitor mode. Then make all graphs and spaces visible.
+          if (dataset.mode != "mon"){
+            prep_monitor_mode()
+          }
 
-	  }
+          if (document.getElementById("setup_ap").options.length <= 1){
+                AP_update(data);
+                //TODO: Not that imporant, but perhaps fill the AP_select and AP_pass in
+          }
 
-	  refreshClientGraphs(data)	//Refresh Client Graphs
-	  dataset = data 	//Update Dataset
-	  
+		  //Check if we need to add any more clients to the website.
+		  if ((dataset.clients == undefined) || (data.clients.length > dataset.clients.length)){
+		  	n = 0
+		  	if (dataset.clients != undefined){ n = dataset.clients.length}
 
-	  //alert( "Load was performed." );
-		  
+		  	for (i = n; i < data.clients.length; i++){
+				addClient(data.clients[i])
+				//console.log("Created: "+data.clients[i].mac)	
+		  	}
+
+		  }
+
+		  refreshClientGraphs(data)	//Refresh Client Graphs
+		}
+
+
+		dataset = data 	//Update Dataset
 	});	
 }
 
@@ -105,6 +169,8 @@ function addClient(client){
 	chart_type[client.mac] = 0 //Initialize Chart Type
 }
 
+
+//Refresh The Client Maps
 function refreshClientGraphs(data){
 	clients = data.clients
 	//Refresh a graph with new datapoints
@@ -121,7 +187,7 @@ function refreshClientGraphs(data){
 				//X-Axis
 				time = new Date(report[j][0]*1000)
 				//time = time.getHours()*100+ time.getMinutes()+(time.getSeconds()/100)
-				console.log(report)
+				//console.log(report)
 				//Y-Axis
 				sentpoints.push({x: time, y: report[j][1]["sent"]})
 				recvpoints.push({x: time, y: report[j][1]["recv"]})
@@ -162,7 +228,7 @@ function refreshClientGraphs(data){
 				//X-Axis
 				time = new Date(report[j][0]*1000)
 				//time = time.getHours()*100+ time.getMinutes()+(time.getSeconds()/100)
-				console.log(report)
+				//console.log(report)
 				//Y-Axis
 				udppoints.push({x: time, y: report[j][1]["udp"]})
 				tcppoints.push({x: time, y: report[j][1]["tcp"]})
@@ -207,14 +273,16 @@ function refreshClientGraphs(data){
 	}
 }
 
-
-
-function setup(){
-	//Setup
-	//
+//Refresh the Main Graph
+function refreshMainGraph(data){
+    //TODO
 }
 
 
-//This schedules the getAllData to be ran every 5 sec.
-var interval = window.setInterval(getAllData, 5000);
+//Run as soon as the website is loaded.
+window.onload = function(){
+    getAllData()
+    //This schedules the getAllData to be ran every 5 sec.
+    var interval = window.setInterval(getAllData, 5000);
+}
 
