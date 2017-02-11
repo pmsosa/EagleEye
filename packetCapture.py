@@ -1,11 +1,12 @@
 from scapy.all import *
 import time, copy, requests, jsonpickle
 import sys
+from IPython import embed
 
 url = "http://localhost:1992"
 endpoint = "setPacketCaptr"
 iface = "tap0"
-timeout = 30 # For unlimited time set = None
+timeout = 120 # For unlimited time set = None
 
 timestep = 5 # 5 Seconds (Equivalent to the granularity of the graphs)
 clients = []
@@ -18,18 +19,20 @@ debug = False
 class Client:
 
     windowsize = timestep
+    timesteps = [time.time()]; #List of shared timesteps done by all points.
     
     template = {'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'http': 0,'https': 0}
     #template = {'timestamp': None, 'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'type':{}}
     # Timewindow must be "static" among clients so the points on the graph match nicely.
-    last_timestamp = [time.time(),time.ctime()] # [Millisecs,Timestamp]
+    #last_timestamp = [time.time(),time.ctime()] # [Millisecs,Timestamp]
 
     def __init__(self,mac,ip="",name="",os="",debug=False):
+        if (Client.timesteps == []): Client.timesteps = [time.time()];
         self.mac = mac   # MAC
-        self.ip = ""     # IP
-        self.name = ""   # Gotten by Nmap Sweep
-        self.os = ""     # Mac, Linux, Windows, Other, N/A
-        self.report = [[Client.last_timestamp[0],copy.deepcopy(self.template)]] # Probably a list of dictionaries [{'timestamp':'9:00:00','https':'20%','udp':'80%'},...]
+        self.ip = ip     # IP
+        self.name = name   # Gotten by Nmap Sweep
+        self.os = os     # Mac, Linux, Windows, Other, N/A
+        self.report = [[Client.timesteps[-1],copy.deepcopy(self.template)]] # Probably a list of dictionaries [{'timestamp':'9:00:00','https':'20%','udp':'80%'},...]
         self.debug = debug
 
     def record_packet(self,packet):
@@ -40,17 +43,17 @@ class Client:
             print self.report
         
 
-        if (t < Client.last_timestamp[0] + self.windowsize):
+        if (t < Client.timesteps[-1] + self.windowsize):
             if self.debug: print ">> In Window!"
             #Packet is inside window size
             element = self.report[len(self.report)-1][1] #This is a shallow copy        
             
         else:
-            Client.last_timestamp = [time.time(),time.ctime()]
+            Client.timesteps += [time.time()]
             if self.debug: print "<< Out of Window!"
             #Packet is outside of window size   
             element = copy.deepcopy(self.template)
-            node = [Client.last_timestamp[0], element]
+            node = [Client.timesteps[-1], element]
             self.report += [node] #This is still a shallow appending
 
         # { 'timestamp': ,'sent':, 'recieved':,'type':['80':'443':...etc.]}
@@ -95,7 +98,7 @@ def rec_packet(packet):
     try:
         t = time.time()        
         ## --- Should we send an Update to Flask Server--- ##
-        if (t > Client.last_timestamp[0] + timestep):
+        if (t > Client.timesteps[-1] + timestep):
             upload_data()
 
 
@@ -137,9 +140,14 @@ def print_debuggin_info():
 
 def upload_data():
     global clients,url,endpoint
-    r = requests.post(url+"/"+endpoint,headers={'Content-type':'application/json'},data=jsonpickle.encode(clients))
-
+    try:
+        temp = [clients,clients[0].timesteps]
+        print temp
+        r = requests.post(url+"/"+endpoint,headers={'Content-type':'application/json'},data=jsonpickle.encode(temp))
+    except:
+        print "Failed to Upload Data"
 
 
 if __name__ == "__main__":
     monitor(timeout,iface)
+    #embed()

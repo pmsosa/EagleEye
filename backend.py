@@ -21,14 +21,17 @@ class Dataset:
                             ## "init" = Application just started. We need to look for access points and user has to stipulate which AP they want to monitor.
                             ## "mon"  = We are actively monitoring an AP
         self.monitor_info = None ## Monitor Info is a tuple: [Selected AP, Password]
+        self.timesteps = []
 
 
 TESTING = False #If set to true there will be no data collection just fake data
-dataset = Dataset() ## Contains all the client packets and whatnot    
+dataset = Dataset() ## Contains all the client packets and whatnot
+#Not sure why I'm being forced to do this initialization....    
 dataset.clients = []
 dataset.monitor_info = []
 dataset.mode = "init"
 dataset.APs = []
+dataset.timesteps = []
 
 #########################SERVING STATIC FILES###################
 # Serving Static Files (THIS IS DANGREOUS)                     #
@@ -78,7 +81,9 @@ def add_Clients():
     global dataset
     content = request.get_json(silent=False)
     content = jsonpickle.encode(content)
-    dataset.clients = jsonpickle.decode(content)
+    temp = jsonpickle.decode(content)
+    dataset.clients = temp[0]
+    dataset.timesteps = temp[1]
     return "OK"
 
 #Updates the Clients Packet Capture
@@ -96,19 +101,19 @@ def setup():
     global dataset
     content = request.get_json(silent=False)
     content = jsonpickle.encode(content)
-    dataset.monitor_info = jsonpickle.decode(content)
-    dataset.mode = "mon"
-    #You have to change setup.sh
-    #proc1 =  Popen(["sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["bssid"]+":"+dataset.monitor_info["password"]+"'"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
-    c = 0
+    temp = jsonpickle.decode(content)
+
     for ap in dataset.APs:
-        if (ap["bssid"]==dataset.monitor_info["bssid"]):
-            c = ap["channel"]
+        if (ap["essid"]==temp["essid"]):
+            dataset.monitor_info = {"essid":temp["essid"],"password":temp["password"],"mac":ap["mac"],"channel":ap["channel"]}
             break;
 
+    dataset.mode = "mon"
+    #You have to change setup.sh
+    #proc1 =  Popen(["sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["essid"]+":"+dataset.monitor_info["password"]+"'"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
     #proc1 = Popen(["sudo iwconfig wlan1 channel"+str(c)])
-    print "Moved wlan1 to channel",c
-    print "RUN:","sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["bssid"]+":"+dataset.monitor_info["password"]+"'"
+    print "Moved wlan1 to channel",dataset.monitor_info["channel"]
+    print "RUN:","sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["essid"]+":"+dataset.monitor_info["password"]+"'"
     proc2 = Popen(["sudo python packetCapture.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)    
     
     return "OK"

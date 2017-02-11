@@ -4,29 +4,11 @@ var startMon_endpoint = "../start_monitor"  //This is the endpoing called to sta
 
 var dataset = [] 	//This is the dataset object that will be acessed by getAllData
 var colors = {'red':"#FF0000", 'black':"#000000",'yellow':'#FFFF00','blue':'#0000FF','green':'#008000'} //List of colors for our graphs
-var chart_type = {'main':'usage'} //This dictionary specifies which type of graph we have set up initially for each chart.
-
+var chart_type = {'main':0} //This dictionary specifies which type of graph we have set up initially for each chart.
+var charts = {"main": null}
 /// FUNCTIONS ///
 
-///TEMPORARY BULLSHIT
-chartdata = {
-	datasets: [{
-	        label: 'Host 1',
-	        data: [{ x: -10, y: 0 }, { x: 0, y: 10 }, { x: 10, y: 5 }],
-	        fill: false,
-	        borderColor: colors.red,
-	        pointRadius: 3
-	    	},
-	    	{
-	    	label: 'Host 2',
-	        data: [{ x: -5, y: 0 }, { x: 1, y: 10 }, { x: 6, y: 5 }],
-	        fill: false,
-	        borderColor: colors.blue,
-	        pointRadius: 1
-	    	}
-	    	]
-}
-
+///Options for the Charts
 options = {
 	scales: {
 		xAxes:[{
@@ -62,7 +44,7 @@ function AP_update(data){
     var ap_bar = document.getElementById("setup_ap");
     for (i = 0; i < data.APs.length; i++){
         option = document.createElement("option");
-        option.text = data.APs[i].bssid;
+        option.text = data.APs[i].essid;
         ap_bar.add(option);
     }
     mode = "wait"
@@ -70,10 +52,10 @@ function AP_update(data){
 
 //Update The WiFi Table
 function refreshMainTable(data){
-    document.getElementById("ap_name").innerHTML = data.monitor_info.bssid;
+    document.getElementById("ap_name").innerHTML = data.monitor_info.essid;
     document.getElementById("ap_usage").innerHTML = "TODO"
-    document.getElementById("ap_mac").innerHTML = "TODO --BE"
-    document.getElementById("ap_channel").innerHTML = "TODO --BE"
+    document.getElementById("ap_mac").innerHTML = data.monitor_info.mac;
+    document.getElementById("ap_channel").innerHTML = data.monitor_info.channel;
 }
 
 //Start monitoring (When user clicks on monitor button)
@@ -83,7 +65,7 @@ function start_monitor(){
     pass = document.getElementById("setup_pass").value
     console.log("Start Monitoring on "+ap+" "+pass)
 
-    monitor_info = {"bssid":ap,"password":pass}
+    monitor_info = {"essid":ap,"password":pass}
     $.ajax(startMon_endpoint,{
         data: JSON.stringify(monitor_info),
         contentType: "application/json",
@@ -111,7 +93,7 @@ function prep_monitor_mode(data){
     //Fill the AP and Password Bar
     var ap_bar = document.getElementById("setup_ap");
     option = document.createElement("option");
-    option.text = data.monitor_info.bssid;
+    option.text = data.monitor_info.essid;
     option.selected = true;
     ap_bar.add(option);
     document.getElementById("setup_pass").value = data.monitor_info.password;
@@ -152,13 +134,16 @@ function getAllData(){
 		  	if (dataset.clients != undefined){ n = dataset.clients.length}
 
 		  	for (i = n; i < data.clients.length; i++){
-				addClient(data.clients[i])
-				//console.log("Created: "+data.clients[i].mac)	
+                if (data.clients[i].mac != data.monitor_info.mac){ //Don't Add The AP
+    				addClient(data.clients[i])
+    				//console.log("Created: "+data.clients[i].mac)	
+                }
 		  	}
 
 		  }
 
 		  refreshClientGraphs(data)	//Refresh Client Graphs
+          refreshMainGraph(data)    //Refresh Main Graph
 		}
 
 
@@ -205,7 +190,7 @@ function refreshClientGraphs(data){
   			recvpoints = []
 
 			for (j = 0; j < clients[i]["report"].length; j++){
-				//if (clients[i]["mac"] != ap_bssid){
+				//if (clients[i]["mac"] != ap_essid){
                     report = clients[i]["report"]
     				//X-Axis
     				time = new Date(report[j][0]*1000)
@@ -234,7 +219,11 @@ function refreshClientGraphs(data){
 				    	]
 			}
 
-			new Chart(clients[i].mac+"_chart", {
+            //Destroy the Previous Chart
+            try{charts[clients[i].mac].destroy()}
+            catch(err){/*Don't Worry be Happy*/}
+
+			charts[clients[i].mac] = new Chart(clients[i].mac+"_chart", {
 		    type: 'line',
 		    data: chartdata,
 		    options: options
@@ -305,14 +294,75 @@ function switch_graph(mac,type){
     document.getElementById(mac+"_toggle_"+2).disabled = false;
 
     document.getElementById(mac+"_toggle_"+type).disabled = true;
-
-
 }
 
 //Refresh the Main Graph
 function refreshMainGraph(data){
-    //TODO
 
+    
+    if (chart_type["main"] == 0){ 
+
+        //Destroy the Previous Chart
+        try{charts["main"].destroy()}
+        catch(err){/*Don't Worry be Happy*/}
+
+        sentpoints = []
+        recvpoints = []
+
+        //Highly unscalable. But its late and I just want this to work.
+        for (k = 0; k < data.timesteps.length; k++){
+            
+            ys = 0;
+            yr = 0;
+
+
+            for (i = 0; i < data.clients.length;i++){
+                for (j = 0; j < data.clients[i].report.length;j++){
+
+                    if (data.clients[i].report[j][0] == data.timesteps[k]){
+                        ys = data.clients[i].report[j][1]["sent"]
+                        yr = data.clients[i].report[j][1]["recv"]
+                    }
+                    else if (data.clients[i].report[j][0] > data.timesteps[k]){
+                        break; //Go to next client and don't waste your time.
+                    }
+                }
+
+            }
+
+            sentpoints.push({x: data.timesteps[k], y: ys})
+            recvpoints.push({x: data.timesteps[k], y: yr})
+                    
+        }
+
+        console.info(sentpoints)
+        console.info(recvpoints)
+
+        chartdata = {
+            datasets: [
+                        {label: 'Sent',
+                        data: sentpoints,
+                        fill: false,
+                        borderColor: colors.red,
+                        pointRadius: 3},
+
+                        {label: 'Recieved',
+                        data: recvpoints,
+                        fill: false,
+                        borderColor: colors.blue,
+                        pointRadius: 3}
+                    ]
+        }
+
+
+        charts["main"] = new Chart("mainChart", {
+            type: 'line',
+            data: chartdata,
+            options: options
+        });
+
+
+    }
 }
 
 
