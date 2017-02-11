@@ -189,19 +189,31 @@ function refreshClientGraphs(data){
   			sentpoints = []
   			recvpoints = []
 
-			for (j = 0; j < clients[i]["report"].length; j++){
-				//if (clients[i]["mac"] != ap_essid){
-                    report = clients[i]["report"]
-    				//X-Axis
-    				time = new Date(report[j][0]*1000)
-    				//time = time.getHours()*100+ time.getMinutes()+(time.getSeconds()/100)
-    				//console.log(report)
-    				//Y-Axis
-    				sentpoints.push({x: time, y: report[j][1]["sent"]})
-    				recvpoints.push({x: time, y: report[j][1]["recv"]})
-    				//console.info(report)
-                //}
-			}
+            for (k = 0; k < data.timesteps.length; k++){
+                
+                ys = 0;
+                yr = 0;
+                
+                for (j = 0; j < clients[i]["report"].length; j++){
+    				//if (clients[i]["mac"] != ap_essid){
+                        report = clients[i]["report"]
+        				//X-Axis
+        				//time = new Date(report[j][0]*1000)
+
+        				//Y-Axis
+                        if (report[j][0] == data.timesteps[k]){
+                            ys = report[j][1]["sent"]
+                            yr = report[j][1]["recv"]
+                        }
+                        else if (report[j][0] > data.timesteps[k]){
+                            break;
+                        }
+    			}
+
+                sentpoints.push({x: data.timesteps[k]*1000, y: ys})
+                recvpoints.push({x: data.timesteps[k]*1000, y: yr})
+
+            }
 
 	  		chartdata = {
 				datasets: [
@@ -330,8 +342,8 @@ function refreshMainGraph(data){
 
             }
 
-            sentpoints.push({x: data.timesteps[k], y: ys})
-            recvpoints.push({x: data.timesteps[k], y: yr})
+            sentpoints.push({x: data.timesteps[k]*1000, y: ys})
+            recvpoints.push({x: data.timesteps[k]*1000, y: yr})
                     
         }
 
