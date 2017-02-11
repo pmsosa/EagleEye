@@ -62,10 +62,18 @@ function AP_update(data){
     var ap_bar = document.getElementById("setup_ap");
     for (i = 0; i < data.APs.length; i++){
         option = document.createElement("option");
-        option.text = data.APs[i].name;
+        option.text = data.APs[i].bssid;
         ap_bar.add(option);
     }
     mode = "wait"
+}
+
+//Update The WiFi Table
+function refreshMainTable(data){
+    document.getElementById("ap_name").innerHTML = data.monitor_info.bssid;
+    document.getElementById("ap_usage").innerHTML = "TODO"
+    document.getElementById("ap_mac").innerHTML = "TODO --BE"
+    document.getElementById("ap_channel").innerHTML = "TODO --BE"
 }
 
 //Start monitoring (When user clicks on monitor button)
@@ -87,15 +95,27 @@ function start_monitor(){
     $("#setup_pass").prop('disabled',true)
     $("#setup_btn").prop('disabled',true)
 
-
     return false;
 }
 
 //Make chart areas visible for monitor mode
-function prep_monitor_mode(){
+function prep_monitor_mode(data){
     document.getElementById("total_container").style.display = "block";
     document.getElementById("client_header").style.display = "block";
     document.getElementById("AP_help").style.display = "none";
+
+    $("#setup_ap").prop('disabled',true)
+    $("#setup_pass").prop('disabled',true)
+    $("#setup_btn").prop('disabled',true)
+
+    //Fill the AP and Password Bar
+    var ap_bar = document.getElementById("setup_ap");
+    option = document.createElement("option");
+    option.text = data.monitor_info.bssid;
+    option.selected = true;
+    ap_bar.add(option);
+    document.getElementById("setup_pass").value = data.monitor_info.password;
+
 }
 
 
@@ -116,9 +136,11 @@ function getAllData(){
 
           //If we are switching from AP select to monitor mode. Then make all graphs and spaces visible.
           if (dataset.mode != "mon"){
-            prep_monitor_mode()
+            prep_monitor_mode(data)
+            refreshMainTable(data)
           }
 
+          //Update the list of APs in case it hasn;t already been updated
           if (document.getElementById("setup_ap").options.length <= 1){
                 AP_update(data);
                 //TODO: Not that imporant, but perhaps fill the AP_select and AP_pass in
@@ -183,15 +205,17 @@ function refreshClientGraphs(data){
   			recvpoints = []
 
 			for (j = 0; j < clients[i]["report"].length; j++){
-				report = clients[i]["report"]
-				//X-Axis
-				time = new Date(report[j][0]*1000)
-				//time = time.getHours()*100+ time.getMinutes()+(time.getSeconds()/100)
-				//console.log(report)
-				//Y-Axis
-				sentpoints.push({x: time, y: report[j][1]["sent"]})
-				recvpoints.push({x: time, y: report[j][1]["recv"]})
-				//console.info(report)
+				//if (clients[i]["mac"] != ap_bssid){
+                    report = clients[i]["report"]
+    				//X-Axis
+    				time = new Date(report[j][0]*1000)
+    				//time = time.getHours()*100+ time.getMinutes()+(time.getSeconds()/100)
+    				//console.log(report)
+    				//Y-Axis
+    				sentpoints.push({x: time, y: report[j][1]["sent"]})
+    				recvpoints.push({x: time, y: report[j][1]["recv"]})
+    				//console.info(report)
+                //}
 			}
 
 	  		chartdata = {
@@ -273,9 +297,22 @@ function refreshClientGraphs(data){
 	}
 }
 
+//Button binding function to switch type of graph.
+function switch_graph(mac,type){
+    chart_type[mac] = type;
+    document.getElementById(mac+"_toggle_"+0).disabled = false;
+    document.getElementById(mac+"_toggle_"+1).disabled = false;
+    document.getElementById(mac+"_toggle_"+2).disabled = false;
+
+    document.getElementById(mac+"_toggle_"+type).disabled = true;
+
+
+}
+
 //Refresh the Main Graph
 function refreshMainGraph(data){
     //TODO
+
 }
 
 

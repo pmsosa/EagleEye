@@ -16,7 +16,7 @@ def rec_ap(packet):
     try:
         #  type = Managment | subtype = Beacon
         if packet.type == 0 and packet.subtype == 8:
-            element = {"name":packet[Dot11Elt].info,"mac":packet.addr2,"channel":int(ord(packet[Dot11Elt:3].info))}
+            element = {"bssid":packet[Dot11Elt].info,"mac":packet.addr2,"channel":int(ord(packet[Dot11Elt:3].info))}
             if element not in APs:
                 print "Found:",packet.addr2,"("+packet[Dot11Elt].info+")","-C:",int(ord(packet[Dot11Elt:3].info))
                 APs +=[element]

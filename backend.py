@@ -3,6 +3,8 @@ from flask import *
 import jsonpickle
 from subprocess import Popen
 from os import path
+from IPython import embed
+import cPickle as pickle
 
 
 app = Flask(__name__)
@@ -98,6 +100,14 @@ def setup():
     dataset.mode = "mon"
     #You have to change setup.sh
     #proc1 =  Popen(["sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["bssid"]+":"+dataset.monitor_info["password"]+"'"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
+    c = 0
+    for ap in dataset.APs:
+        if (ap["bssid"]==dataset.monitor_info["bssid"]):
+            c = ap["channel"]
+            break;
+
+    #proc1 = Popen(["sudo iwconfig wlan1 channel"+str(c)])
+    print "Moved wlan1 to channel",c
     print "RUN:","sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["bssid"]+":"+dataset.monitor_info["password"]+"'"
     proc2 = Popen(["sudo python packetCapture.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)    
     
@@ -110,25 +120,26 @@ def alive():
     print "Here be dragons..."
     return "Here be dragons.."
 
-#DEPRECATED (Divided into /setAPs and /setPacketCaptr)
-# # Updates the Dataset Structure
-# @app.route('/setdata',methods=['POST'])
-# def add_data():
-#     global dataset
-#     content = request.get_json(silent=False)
-#     print content
-#     content = jsonpickle.encode(content)
-#     dataset = jsonpickle.decode(content)
-#     return "OK"
+# Add a breakpoint. Useful for Debuggin'
+@app.route('/break',methods=['GET'])
+def breakpoint():
+    global dataset, TESTING
+    print "Entering Breakpoint"
+    embed()
+    return "OK"
+
 
 if __name__ == "__main__":
-    global dataset
     #Run setup.sh
 
     if (not TESTING):
         proc = Popen(["sudo python APFind.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
         #proc = Popen(["sudo python packetCapture.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
-
+    else:
+        print "Loaded..."
+        output = open("data.pkl","rb")
+        dataset = pickle.load(output)
+        output.close()
 
 
     app.debug = True

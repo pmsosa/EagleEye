@@ -89,10 +89,10 @@
 			<div class="col-sm-4">
 				<table class="table" style="background-color:#f1f1f1">
 					<tr><th colspan="2" style="text-align: center;">Basic Information</th></tr>
-					<tr><th>AP:</th><td>Pretty Fly For a WiFi</td></tr>
-					<tr><th>Est. Usage:</th><td>20%</td></tr>
-					<tr><th>BSSID:</th><td>FF:32:2A:23:44</td></tr>
-					<tr><th>Channel:</th><td>11</td></tr>
+					<tr><th>AP:</th><td id="ap_name">Pretty Fly For a WiFi</td></tr>
+					<tr><th>Est. Usage:</th><td id="ap_usage">20%</td></tr>
+					<tr><th>MAC:</th><td id="ap_mac">FF:32:2A:23:44</td></tr>
+					<tr><th>Channel:</th><td id="ap_channel">11</td></tr>
 				</table>
 			</div>
 			<div class="col-sm-7">
@@ -140,9 +140,9 @@
 					</div>
 					<div class="col-sm-2">
 						<label align="center">Graphs</label>
-						<button id="XXXX_toggle_0" class="btn btn-default" style="width:100%">Usage</button>
-						<button id="XXXX_toggle_1" class="btn btn-default" style="width:100%">Pkt. Type</button>
-						<button id="XXXX_toggle_2" class="btn btn-default" style="width:100%">Ports</button>
+						<button id="XXXX_toggle_0" class="btn btn-default" onclick="switch_graph('XXXX',0)" style="width:100%" disabled>Usage</button>
+						<button id="XXXX_toggle_1" class="btn btn-default" onclick="switch_graph('XXXX',1)" style="width:100%">Pkt. Type</button>
+						<button id="XXXX_toggle_2" class="btn btn-default" onclick="switch_graph('XXXX',2)" style="width:100%">Ports</button>
 					</div>
 				</div>
 			</div>
