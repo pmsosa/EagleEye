@@ -248,17 +248,31 @@ function refreshClientGraphs(data){
 			udppoints = []
 			tcppoints = []
 
-			for (j = 0; j < clients[i]["report"].length; j++){
-				report = clients[i]["report"]
-				//X-Axis
-				time = new Date(report[j][0]*1000)
-				//time = time.getHours()*100+ time.getMinutes()+(time.getSeconds()/100)
-				//console.log(report)
-				//Y-Axis
-				udppoints.push({x: time, y: report[j][1]["udp"]})
-				tcppoints.push({x: time, y: report[j][1]["tcp"]})
-				//console.info(report)
-			}
+             for (k = 0; k < data.timesteps.length; k++){
+                
+                ys = 0;
+                yr = 0;
+                
+                for (j = 0; j < clients[i]["report"].length; j++){
+                    //if (clients[i]["mac"] != ap_essid){
+                        report = clients[i]["report"]
+                        //X-Axis
+                        //time = new Date(report[j][0]*1000)
+
+                        //Y-Axis
+                        if (report[j][0] == data.timesteps[k]){
+                            yu = report[j][1]["udp"]
+                            yt = report[j][1]["tcp"]
+                        }
+                        else if (report[j][0] > data.timesteps[k]){
+                            break;
+                        }
+                }
+
+                udppoints.push({x: data.timesteps[k]*1000, y: yu})
+                tcppoints.push({x: data.timesteps[k]*1000, y: yt})
+
+            }
 
 	  		chartdata = {
 				datasets: [
@@ -276,7 +290,12 @@ function refreshClientGraphs(data){
 				    	]
 			}
 
-						new Chart(clients[i].mac+"_chart", {
+            //Destroy the Previous Chart
+            try{charts[clients[i].mac].destroy()}
+            catch(err){/*Don't Worry be Happy*/}
+
+
+			charts[clients[i].mac] = new Chart(clients[i].mac+"_chart", {
 		    type: 'line',
 		    data: chartdata,
 		    options: options
