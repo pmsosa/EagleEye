@@ -2,13 +2,14 @@ from scapy.all import *
 import time, copy, requests, jsonpickle
 import sys
 from IPython import embed
+import traceback
 
 url = "http://localhost:1992"
 endpoint = "setPacketCaptr"
 iface = "tap0"
 timeout = 120 # For unlimited time set = None
 
-timestep = 5 # 5 Seconds (Equivalent to the granularity of the graphs)
+timestep = 1 # 5 Seconds (Equivalent to the granularity of the graphs)
 clients = []
 clients_names = []
 debug = False
@@ -19,7 +20,7 @@ debug = False
 class Client:
 
     windowsize = timestep
-    timesteps = [time.time()]; #List of shared timesteps done by all points.
+    timesteps = [] #[time.time()]; #List of shared timesteps done by all points.
     
     template = {'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'http': 0,'https': 0}
     #template = {'timestamp': None, 'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'type':{}}
@@ -36,8 +37,8 @@ class Client:
         self.debug = debug
 
     def record_packet(self,packet):
-        t = time.time()
-
+        t = packet.payload.time #t = time.time()
+        
         if (self.debug):
             print "-----------------------"
             print self.report
@@ -85,18 +86,26 @@ class Client:
             self.report = self.report[1:]
 
 
-### Data Storage ###
+## Monitor a Real Network ##
 def monitor(timeout=None,iface="tap0"):
     if timeout==None:
         sniff(iface=iface,prn=rec_packet)
     else:
         sniff(timeout=timeout,iface=iface,prn=rec_packet)
-        
-    
+
+## Read from a Capture File ##
+def fake_monitor(n,capture_file):
+    packets = PcapReader(capture_file)
+    for packet in packets:
+        rec_packet(packet)
+
+## Record a packet into our Client Structure ##    
 def rec_packet(packet):
     global clients_names,clients,debug
     try:
-        t = time.time()        
+        if Client.timesteps == []: Client.timesteps += [packet.payload.time]
+
+        t = packet.payload.time #t = time.time()        
         ## --- Should we send an Update to Flask Server--- ##
         if (t > Client.timesteps[-1] + timestep):
             upload_data()
@@ -128,8 +137,11 @@ def rec_packet(packet):
 
     except Exception, e:
             print "ERROR:",e
+            #traceback.print_exc()
+            #if "index" in e: print traceback.print_exc()
             #print packet.show()
 
+## Print Debuggin' Information ##
 def print_debuggin_info():
     global clients
     print "---Clients:"
@@ -138,6 +150,7 @@ def print_debuggin_info():
         print " ",c.report[len(c.report)-1]
         print " "
 
+## POST data to our flask middleman ##
 def upload_data():
     global clients,url,endpoint
     try:
@@ -149,5 +162,10 @@ def upload_data():
 
 
 if __name__ == "__main__":
-    monitor(timeout,iface)
+    if "fake" in sys.argv:
+        #Fake Monitor - 
+        capture = "capture_examples/kaleo.pcapng"
+        fake_monitor(600,capture)
+    else:
+        monitor(timeout,iface)
     #embed()

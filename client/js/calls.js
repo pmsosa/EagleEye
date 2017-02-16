@@ -6,6 +6,7 @@ var dataset = [] 	//This is the dataset object that will be acessed by getAllDat
 var colors = {'red':"#FF0000", 'black':"#000000",'yellow':'#FFFF00','blue':'#0000FF','green':'#008000'} //List of colors for our graphs
 var chart_type = {'main':0} //This dictionary specifies which type of graph we have set up initially for each chart.
 var charts = {"main": null}
+var timestep = 5
 /// FUNCTIONS ///
 
 ///Options for the Charts
@@ -188,9 +189,10 @@ function refreshClientGraphs(data){
 
   			sentpoints = []
   			recvpoints = []
-
-            for (k = 0; k < data.timesteps.length; k++){
-                
+            //console.log
+            //console.log("Here "+data.timesteps[0]+5+" - "+data.timesteps[data.timesteps.length-1]+5)
+            for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
+                //console.log(k)
                 ys = 0;
                 yr = 0;
                 
@@ -201,17 +203,18 @@ function refreshClientGraphs(data){
         				//time = new Date(report[j][0]*1000)
 
         				//Y-Axis
-                        if (report[j][0] == data.timesteps[k]){
-                            ys = report[j][1]["sent"]
-                            yr = report[j][1]["recv"]
+                        if (report[j][0] > k-timestep &&  report[j][0] <= k){
+                            ys += report[j][1]["sent"]
+                            yr += report[j][1]["recv"]
                         }
-                        else if (report[j][0] > data.timesteps[k]){
+                        else if (report[j][0] > k){
                             break;
                         }
     			}
 
-                sentpoints.push({x: data.timesteps[k]*1000, y: ys})
-                recvpoints.push({x: data.timesteps[k]*1000, y: yr})
+                sentpoints.push({x: k*1000, y: ys})
+                recvpoints.push({x: k*1000, y: yr})
+                //console.log(sentpoints)
 
             }
 
@@ -248,10 +251,10 @@ function refreshClientGraphs(data){
 			udppoints = []
 			tcppoints = []
 
-             for (k = 0; k < data.timesteps.length; k++){
+             for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
                 
-                ys = 0;
-                yr = 0;
+                yu = 0;
+                yt = 0;
                 
                 for (j = 0; j < clients[i]["report"].length; j++){
                     //if (clients[i]["mac"] != ap_essid){
@@ -260,17 +263,17 @@ function refreshClientGraphs(data){
                         //time = new Date(report[j][0]*1000)
 
                         //Y-Axis
-                        if (report[j][0] == data.timesteps[k]){
-                            yu = report[j][1]["udp"]
-                            yt = report[j][1]["tcp"]
+                        if (report[j][0] > k-timestep && report[j][0] <= k){
+                            yu += report[j][1]["udp"]
+                            yt += report[j][1]["tcp"]
                         }
-                        else if (report[j][0] > data.timesteps[k]){
+                        else if (report[j][0] > k){
                             break;
                         }
                 }
 
-                udppoints.push({x: data.timesteps[k]*1000, y: yu})
-                tcppoints.push({x: data.timesteps[k]*1000, y: yt})
+                udppoints.push({x: k*1000, y: yu})
+                tcppoints.push({x: k*1000, y: yt})
 
             }
 
@@ -327,6 +330,7 @@ function switch_graph(mac,type){
     document.getElementById(mac+"_toggle_"+type).disabled = true;
 }
 
+
 //Refresh the Main Graph
 function refreshMainGraph(data){
 
@@ -341,33 +345,35 @@ function refreshMainGraph(data){
         recvpoints = []
 
         //Highly unscalable. But its late and I just want this to work.
-        for (k = 0; k < data.timesteps.length; k++){
+        for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
             
             ys = 0;
             yr = 0;
 
-
+            //if (fff){console.log("k'--"+k)}
             for (i = 0; i < data.clients.length;i++){
                 for (j = 0; j < data.clients[i].report.length;j++){
 
-                    if (data.clients[i].report[j][0] == data.timesteps[k]){
-                        ys = data.clients[i].report[j][1]["sent"]
-                        yr = data.clients[i].report[j][1]["recv"]
+                    if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
+                        ys += data.clients[i].report[j][1]["sent"]
+                        yr += data.clients[i].report[j][1]["recv"]
+                        //if (fff){console.log(ys+"-"+data.clients[i].report[j][1]["sent"]+" <"+i+","+j+">")}
                     }
-                    else if (data.clients[i].report[j][0] > data.timesteps[k]){
+                    else if (data.clients[i].report[j][0] > k){
                         break; //Go to next client and don't waste your time.
                     }
                 }
 
             }
 
-            sentpoints.push({x: data.timesteps[k]*1000, y: ys})
-            recvpoints.push({x: data.timesteps[k]*1000, y: yr})
+            sentpoints.push({x: k*1000, y: ys})
+            recvpoints.push({x: k*1000, y: yr})
+            fff = false
                     
         }
 
-        console.info(sentpoints)
-        console.info(recvpoints)
+        //console.info(sentpoints)
+        //console.info(recvpoints)
 
         chartdata = {
             datasets: [

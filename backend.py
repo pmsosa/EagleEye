@@ -1,8 +1,8 @@
 from flask import *
-#from main import *
 import jsonpickle
 from subprocess import Popen
 from os import path
+import requests
 from IPython import embed
 import cPickle as pickle
 
@@ -24,7 +24,7 @@ class Dataset:
         self.timesteps = []
 
 
-TESTING = False #If set to true there will be no data collection just fake data
+TESTING = True #If set to true there will be no data collection just fake data
 dataset = Dataset() ## Contains all the client packets and whatnot
 #Not sure why I'm being forced to do this initialization....    
 dataset.clients = []
@@ -70,8 +70,9 @@ def home():
 @app.route('/getalldataset')
 def get_data():
     global dataset
-    if TESTING: data = dataset
-    else: data = jsonpickle.encode(dataset)
+    #if TESTING: data = dataset
+    #else: data = jsonpickle.encode(dataset)
+    data = jsonpickle.encode(dataset)
     resp = Response(response=data,status=200, mimetype="application/json")
     return resp
 
@@ -141,10 +142,18 @@ if __name__ == "__main__":
         proc = Popen(["sudo python APFind.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
         #proc = Popen(["sudo python packetCapture.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
     else:
-        print "Loaded..."
-        output = open("data.pkl","rb")
-        dataset = pickle.load(output)
-        output.close()
+        #proc = Popen(["sudo python APFind.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
+        dataset.APs = [{"essid":"Fake AP#1","mac":"12:23:34:35","channel":6},{"essid":"Test AP","mac":"AF:22:44:55","channel":1}]
+        #r = requests.post("http://localhost:1992/setAPs",headers={'Content-type':'application/json'},data=jsonpickle.encode(data))
+        dataset.monitor_info = {"essid":"Konuko II","mac":"12:23:34:35","channel":"6","password":"vzla-mate"}
+        dataset.mode = "mon"
+        proc = Popen(["sudo python packetCapture.py fake"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
+        
+        # print "Loaded..."
+        # output = open("data.pkl","rb")
+        # dataset = pickle.load(output)
+        # output.close()
+        #embed()
 
 
     app.debug = True
