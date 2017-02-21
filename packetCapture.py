@@ -34,9 +34,11 @@ class Client:
         self.name = name   # Gotten by Nmap Sweep
         self.os = os     # Mac, Linux, Windows, Other, N/A
         self.report = [[Client.timesteps[-1],copy.deepcopy(self.template)]] # Probably a list of dictionaries [{'timestamp':'9:00:00','https':'20%','udp':'80%'},...]
+        self.leak = [];
         self.debug = debug
 
     def record_packet(self,packet):
+        #print ".",
         t = packet.payload.time #t = time.time()
         
         if (self.debug):
@@ -74,6 +76,10 @@ class Client:
         if (packet.sport == 443): element["https"] += 1
         elif (packet.sport == 80): element["http"] = 1
 
+        #Check HTTP Leaks
+        if (packet.dport == 80):
+            self.check_leaks(packet)
+
         #Keep packets in dict type
         #try:
             #If this crashes then entry for this port doesn't exist, so we must create it.
@@ -84,6 +90,25 @@ class Client:
         ### Constraint Size of Report to 1000 datapoints ~ 5000s (1.3 hours) = ###
         if (len(self.report) > 1000):
             self.report = self.report[1:]
+
+
+    def check_leaks(self,packet):
+        try:
+            if (packet[Raw].load[:4] == "POST"):
+                print "Post found"
+                raw = packet[Raw].load.lower()
+                r1 = raw[raw.index("host:"):]
+                host = r1[:r1.index("\r\n")]
+                content = raw[raw.index("content-length:"):]
+                tleak = {"host":host,"content":content}
+
+                self.leak += [tleak];
+        except:
+            pass;
+        #check if they have something called password or login
+        #check host and return host.
+        return "TODO"
+
 
 
 ## Monitor a Real Network ##
@@ -98,6 +123,7 @@ def fake_monitor(n,capture_file):
     packets = PcapReader(capture_file)
     for packet in packets:
         rec_packet(packet)
+    upload_data(); #Just in case data capture was small
 
 ## Record a packet into our Client Structure ##    
 def rec_packet(packet):
@@ -164,7 +190,7 @@ def upload_data():
 if __name__ == "__main__":
     if "fake" in sys.argv:
         #Fake Monitor - 
-        capture = "capture_examples/kaleo.pcapng"
+        capture = "capture_examples/http_leak.pcapng"
         fake_monitor(600,capture)
     else:
         monitor(timeout,iface)
