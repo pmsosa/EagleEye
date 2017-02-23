@@ -107,6 +107,9 @@ function getAllData(){
 	$.get( getData_endpoint, function( data ) {
 		console.log(data);
 
+        //Don't refresh dataset unless it is necessary
+        if (dataset.version == data.version){ console.log("No new data"); return true;}
+
 		//INIT MODE - Still not doing packet Capturing
 		if (data.mode == "init"){
             //Avoid overfilling the dropdown for AP selection

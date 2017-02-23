@@ -5,6 +5,7 @@ from os import path
 import requests
 from IPython import embed
 import cPickle as pickle
+import random
 
 
 app = Flask(__name__)
@@ -22,6 +23,7 @@ class Dataset:
                             ## "mon"  = We are actively monitoring an AP
         self.monitor_info = None ## Monitor Info is a tuple: [Selected AP, Password]
         self.timesteps = []
+        self.version = int(random.random()*1000000000) ## Esentially used as a version number for the dataset. If there has been a modification then you change this number
 
 
 TESTING = True #If set to true there will be no data collection just fake data
@@ -101,6 +103,7 @@ def add_Clients():
     temp = jsonpickle.decode(content)
     dataset.clients = temp[0]
     dataset.timesteps = temp[1]
+    dataset.version = int(random.random()*1000000000)
     return "OK"
 
 #Updates the Clients Packet Capture
@@ -110,6 +113,7 @@ def add_APs():
     content = request.get_json(silent=False)
     content = jsonpickle.encode(content)
     dataset.APs = jsonpickle.decode(content)
+    dataset.version = int(random.random()*1000000000)
     return "OK"
 
 # User specifies WLAN name and password
@@ -126,6 +130,7 @@ def setup():
             break;
 
     dataset.mode = "mon"
+    dataset.version = int(random.random()*1000000000)
     #You have to change setup.sh
     #proc1 =  Popen(["sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["essid"]+":"+dataset.monitor_info["password"]+"'"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
     #proc1 = Popen(["sudo iwconfig wlan1 channel"+str(c)])
