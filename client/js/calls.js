@@ -159,13 +159,36 @@ function getAllData(){
 
 //Refresh the client information (usage, leaks, etc.)
 function refreshClientInfo(data){
+    
+    //LEAKS
     for (j = 0; j < data.clients.length; j++){
         c = document.getElementById(data.clients[j].mac+"_leaks");
         if (data.clients[j].leak.length == 0){ c.innerHTML = "None"}
         else{c.innerHTML = "⚠️️ Leaks found ("+data.clients[j].leak.length+")"}
     }
+    //Usage
+    senttotal = 0;
+    recvtotal = 0;
+    ctotal = []; 
+    for (i = 0; i < data.clients.length ;i++){
+        for (j = 0; j < data.clients[i].report.length; j++){
+            senttotal += data.clients[i].report[j][1]["sent"]
+            recvtotal += data.clients[i].report[j][1]["recv"]
+        }
+        ctotal.push([senttotal,recvtotal])
+    }
+    console.log(ctotal);
+    console.log(senttotal);
+
+    for (i=0; i < data.clients.length; i++){
+        up = document.getElementById(data.clients[i].mac+"_UPusage");
+        dwn = document.getElementById(data.clients[i].mac+"_DOWNusage");
+        up.innerHTML = ((100*ctotal[i][0])/senttotal).toFixed(2)+"%"
+        dwn.innerHTML = ((100*ctotal[i][1])/recvtotal).toFixed(2)+"%";
+    }
 
 }
+
 
 //Add a client to the front-end
 function addClient(client){
@@ -340,7 +363,7 @@ function switch_graph(mac,type){
     document.getElementById(mac+"_toggle_"+0).disabled = false;
     document.getElementById(mac+"_toggle_"+1).disabled = false;
     document.getElementById(mac+"_toggle_"+2).disabled = false;
-
+    refreshClientGraphs(dataset);
     document.getElementById(mac+"_toggle_"+type).disabled = true;
 }
 
