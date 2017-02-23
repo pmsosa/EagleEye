@@ -143,6 +143,7 @@ function getAllData(){
 
 		  }
 
+          refreshClientInfo(data)   //Refresh Client Info (Leaks Usage, etc..)
 		  refreshClientGraphs(data)	//Refresh Client Graphs
           refreshMainGraph(data)    //Refresh Main Graph
 		}
@@ -152,6 +153,16 @@ function getAllData(){
 	});	
 }
 
+
+//Refresh the client information (usage, leaks, etc.)
+function refreshClientInfo(data){
+    for (j = 0; j < data.clients.length; j++){
+        c = document.getElementById(data.clients[j].mac+"_leaks");
+        if (data.clients[j].leak.length == 0){ c.innerHTML = "None"}
+        else{c.innerHTML = "⚠️️ Leaks found ("+data.clients[j].leak.length+")"}
+    }
+
+}
 
 //Add a client to the front-end
 function addClient(client){

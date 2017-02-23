@@ -98,7 +98,7 @@ class Client:
                 print "Post found"
                 raw = packet[Raw].load.lower()
                 r1 = raw[raw.index("host:"):]
-                host = r1[:r1.index("\r\n")]
+                host = r1[:r1.index("\r\n")].replace("host:","")
                 content = raw[raw.index("content-length:"):]
                 tleak = {"host":host,"content":content}
 

@@ -61,6 +61,22 @@ def send_js(path):
 def home():
     return render_template('index.html')
 
+@app.route('/leaks/<client>')
+def leaks(client):
+
+    l = None;
+
+    try:
+        for c in dataset.clients:
+            print c["mac"],client
+            if (c["mac"] == client):
+                print "found!"
+                l = c["leak"]
+    except:
+        l = None;
+
+    return render_template('leaks.html',client = client,leaks=l)
+
 ##########################API CALLS#############################
 # All API Calls                                                #
 ################################################################

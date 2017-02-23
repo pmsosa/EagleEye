@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<link rel="shortcut icon" type="image/png" href="../img/favicon.png"/>
+		<title>Eagle Eye - {{client}} Leaks</title>
+	</head>
+
+	<body>
+		<div align="center">
+			<h id="foo"><a class="navbar-brand"><img src="/img/favicon.png" style="height:20px; display:inline;"></img> Eagle Eye</a> - {{client}} Leaks</h>
+			
+			<br/>
+
+			{% if leaks %}
+
+			<p>Password leaks can occur when you log-in on websites that use http (as opposed to https). Check below to see potential leaks.</p>
+
+			<table>
+				<tr><th>Website</th><th>Leak</th></tr>
+				{% for leak in leaks %}
+				<tr><td>{{leak.host}}</td><td>{{leak.content}}</td></tr>
+				{% endfor %}
+			</table>
+
+			{% else %}
+
+			<p>No leaks found for this device :)</p>
+
+			{% endif %}
+
+		</div>
+
+	</body>
+
+</html>
+
+<style>
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    float: center;
+}
+</style>
+
+<script src="..\js\jquery-1.12.0.min.js"></script>
+<script>
+
+window.onload = function(){
+
+}
+
+</script>
