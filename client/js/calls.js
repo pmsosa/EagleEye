@@ -318,9 +318,88 @@ function refreshClientGraphs(data){
 		
 		//Chart Type: 3 - Portwise Chart
 		else if (chart_type[clients[i].mac] == 2){
-			//DO THIS PORTWISE
-			//PICK TOP PORTS, otherwise it'll be impossible to read.
+		    //DO THIS PORTWISE
+		    //PICK TOP PORTS, otherwise it'll be impossible to read.
+		    httpspoints = []
+		    httppoints = []
+		    otherpoints = []
+		    /*for(m = 0; m < clients[i]["report"].length; m++) {
+			report = clients[i]["report"]
+			
+		    }*/
+		    for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
+			
+			ys = 0;
+			yh = 0;
+			yo = 0;
+			for (j = 0; j < clients[i]["report"].length; j++){
+			    //if (clients[i]["mac"] != ap_essid){
+                            report = clients[i]["report"]
+                            //X-Axis
+                            //time = new Date(report[j][0]*1000)
+
+                            //Y-Axis
+                            if (report[j][0] > k-timestep && report[j][0] <= k){
+				//if(!(report[j][1]["ports"]["443"] === undefined)) {
+				ys += report[j][1]["ports"]["443"]
+				
+				//}
+				//if(!(report[j][1]["ports"]["80"] === undefined)) {
+				    yh += report[j][1]["ports"]["80"]
+				//}
+				count = 0;
+				for(key in report[j][1]["ports"]) {
+				    if(key != "443" && key  != "80") {
+					count += report[j][1]["ports"][key]
+				    }
+				}
+				yo += count
+				//ys += count
+				//yh += count
+                            }
+                            else if (report[j][0] > k){
+				break;
+                            }
+			}
+
+			httpspoints.push({x: k*1000, y: ys})
+			httppoints.push({x: k*1000, y: yh})
+			otherpoints.push({x: k*1000, y: yo})
+
+		    }
+
+	  	    chartdata = {
+			datasets: [
+			    {label: 'HTTPS',
+			     data: httpspoints,
+			     fill: false,
+			     borderColor: colors.red,
+			     pointRadius: 3},
+			    
+			    {label: 'HTTP',
+			     data: httppoints,
+			     fill: false,
+			     borderColor: colors.blue,
+			     pointRadius: 3},
+
+			    {label: 'Other',
+			     data: otherpoints,
+			     fill: false,
+			     borderColor: colors.green,
+			     pointRadius: 3}
+			]
+		    }
+		    try{charts[clients[i].mac].destroy()}
+		    catch(err){/*Don't Worry be Happy*/}
+
+
+		    charts[clients[i].mac] = new Chart(clients[i].mac+"_chart", {
+		    type: 'line',
+		    data: chartdata,
+		    options: options
+		    });
 		}
+	   
 
 		//Chart Type: 4 - Portwise Chart
 		else{
