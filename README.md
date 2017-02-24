@@ -33,7 +33,7 @@ You will also need: (*check on both links to see how to build).
 
 **Running the program in TEST Mode (w/o packet capture):**
 - On backend.py, set ```TESTING=False``` in backend.py.
-- On packetCapture.py, set ```capture = "<some path to a .pcap or .pcapng capture file>```.
+- On packetCapture.py, set ```capture = "<some path to a .pcap capture file>```.
 
 <h3>Code Division</h3>
 - backend.py: Runs a flask server listening on localhost:1992 it recieves requests from the client (get data) and data from the APFind and packetCapture scripts (post data).
