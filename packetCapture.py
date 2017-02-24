@@ -22,7 +22,8 @@ class Client:
     windowsize = timestep
     timesteps = [] #[time.time()]; #List of shared timesteps done by all points.
     
-    template = {'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'http': 0,'https': 0}
+    #template = {'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'http': 0,'https': 0}
+    template = {'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'ports': {}}
     #template = {'timestamp': None, 'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'type':{}}
     # Timewindow must be "static" among clients so the points on the graph match nicely.
     #last_timestamp = [time.time(),time.ctime()] # [Millisecs,Timestamp]
@@ -73,9 +74,11 @@ class Client:
         elif (packet.proto == 17): element["udp"] +=1
         
         #Application Layer (HTTP, HTTPS)
-        if (packet.sport == 443): element["https"] += 1
-        elif (packet.sport == 80): element["http"] = 1
-
+        #if (packet.sport == 443): element["https"] += 1
+        #elif (packet.sport == 80): element["http"] = 1
+        if (packet.sport in element["ports"]): element["ports"][packet.sport] += 1
+        else: element["ports"][packet.sport] = 1
+            
         #Check HTTP Leaks
         if (packet.dport == 80):
             self.check_leaks(packet)
