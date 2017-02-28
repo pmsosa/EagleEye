@@ -51,12 +51,30 @@ function AP_update(data){
     mode = "wait"
 }
 
+function getThroughput(data) {
+	for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
+	    bytes = 0 
+            for (i = 0; i < data.clients.length;i++){
+                for (j = 0; j < data.clients[i].report.length;j++){
+		    if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
+                        bytes += data.clients[i].report[j][1]["len"]
+                    }
+                    else if (data.clients[i].report[j][0] > k){
+                        break; //Go to next client and don't waste your time.
+                    }
+                }
+	    }	
+	}
+    return (bytes/(k-data.timesteps[0])).toFixed(2)
+    }
+
 //Update The WiFi Table
 function refreshMainTable(data){
     document.getElementById("ap_name").innerHTML = data.monitor_info.essid;
     document.getElementById("ap_usage").innerHTML = "TODO"
     document.getElementById("ap_mac").innerHTML = data.monitor_info.mac;
     document.getElementById("ap_channel").innerHTML = data.monitor_info.channel;
+    //document.getElementById("ap_throughput").innerHTML = getThroughput(data);
 }
 
 //Start monitoring (When user clicks on monitor button)
@@ -355,9 +373,108 @@ function refreshClientGraphs(data){
 		
 		//Chart Type: 3 - Portwise Chart
 		else if (chart_type[clients[i].mac] == 2){
-			//DO THIS PORTWISE
-			//PICK TOP PORTS, otherwise it'll be impossible to read.
+		    //DO THIS PORTWISE
+		    //PICK TOP PORTS, otherwise it'll be impossible to read.
+		    httpspoints = []
+		    httppoints = []
+		    otherpoints = []
+		    var ports = clients[i]["report"][0][1]["ports"]
+		    for(m = 1; m < clients[i]["report"].length; m++) {
+			for(key in clients[i]["report"][m][1]["ports"]) {
+			    if(ports[key] === undefined) {
+				ports[key] = clients[i]["report"][m][1]["ports"][key]
+			    }
+			    else {
+				ports[key] += clients[i]["report"][m][1]["ports"][key]
+			    }
+			}
+			//var report = Object.keys(clients[i]["report"][m][1]["ports"]).map(function(key) { return [key, clients[i]["report"][m][1]["ports"][key]]; });
+			//console.log("Unsorted: " + report);
+			//report.sort(function(first, second) { return second[1] - first[1]; });
+			//console.log("Sorted: " + report);
+			//console.log(clients[i]["report"])
+			//console.log(clients[i]["report"][j][1]["ports"][1])
+			
+		    }
+		    //console.log(ports)
+		    var report = Object.keys(ports).map(function(key) { return [key, ports[key]]; });
+		    report.sort(function(first, second) { return second[1] - first[1]; });
+		    console.log(report)
+		    topports = [report[0][0], report[1][0], report[2][0]]
+		    console.log(topports)
+		    for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
+			
+			ys = 0;
+			yh = 0;
+			yo = 0;
+			for (j = 0; j < clients[i]["report"].length; j++){
+			    //if (clients[i]["mac"] != ap_essid){
+                            report = clients[i]["report"]
+                            //X-Axis
+                            //time = new Date(report[j][0]*1000)
+
+                            //Y-Axis
+                            if (report[j][0] > k-timestep && report[j][0] <= k){
+				//if(!(report[j][1]["ports"]["443"] === undefined)) {
+				ys += report[j][1]["ports"][topports[0]]
+				
+				//}
+				//if(!(report[j][1]["ports"]["80"] === undefined)) {
+				    yh += report[j][1]["ports"][topports[1]]
+				//}
+				count = 0;
+				for(key in report[j][1]["ports"]) {
+				    if(key != topports[0] && key  != topports[1]) {
+					count += report[j][1]["ports"][key]
+				    }
+				}
+				yo += count
+				//ys += count
+				//yh += count
+                            }
+                            else if (report[j][0] > k){
+				break;
+                            }
+			}
+
+			httpspoints.push({x: k*1000, y: ys})
+			httppoints.push({x: k*1000, y: yh})
+			otherpoints.push({x: k*1000, y: yo})
+
+		    }
+
+	  	    chartdata = {
+			datasets: [
+			    {label: topports[0],
+			     data: httpspoints,
+			     fill: false,
+			     borderColor: colors.red,
+			     pointRadius: 3},
+			    
+			    {label: topports[1],
+			     data: httppoints,
+			     fill: false,
+			     borderColor: colors.blue,
+			     pointRadius: 3},
+
+			    {label: 'Other',
+			     data: otherpoints,
+			     fill: false,
+			     borderColor: colors.green,
+			     pointRadius: 3}
+			]
+		    }
+		    try{charts[clients[i].mac].destroy()}
+		    catch(err){/*Don't Worry be Happy*/}
+
+
+		    charts[clients[i].mac] = new Chart(clients[i].mac+"_chart", {
+		    type: 'line',
+		    data: chartdata,
+		    options: options
+		    });
 		}
+	   
 
 		//Chart Type: 4 - Portwise Chart
 		else{
