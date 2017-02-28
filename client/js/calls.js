@@ -162,9 +162,15 @@ function refreshClientInfo(data){
     
     //LEAKS
     for (j = 0; j < data.clients.length; j++){
-        c = document.getElementById(data.clients[j].mac+"_leaks");
-        if (data.clients[j].leak.length == 0){ c.innerHTML = "None"}
-        else{c.innerHTML = "⚠️️ Leaks found ("+data.clients[j].leak.length+")"}
+		try{
+        	c = document.getElementById(data.clients[j].mac+"_leaks");
+        	if (data.clients[j].leak.length == 0){ c.innerHTML = "None"}
+        	else{c.innerHTML = "⚠️️ Leaks found ("+data.clients[j].leak.length+")"}
+		}		
+			catch(e){
+			console.log("Leak error at "+data.clients[j].mac+"_leaks");
+			//Do nothing :)
+		}
     }
     //Usage
     senttotal = 0;
@@ -181,10 +187,15 @@ function refreshClientInfo(data){
     console.log(senttotal);
 
     for (i=0; i < data.clients.length; i++){
+		try{
         up = document.getElementById(data.clients[i].mac+"_UPusage");
         dwn = document.getElementById(data.clients[i].mac+"_DOWNusage");
         up.innerHTML = ((100*ctotal[i][0])/senttotal).toFixed(2)+"%"
         dwn.innerHTML = ((100*ctotal[i][1])/recvtotal).toFixed(2)+"%";
+		}
+		catch(e){
+			//Do nothing!
+		}
     }
 
 }
