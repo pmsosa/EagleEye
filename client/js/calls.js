@@ -51,12 +51,30 @@ function AP_update(data){
     mode = "wait"
 }
 
+function getThroughput(data) {
+	for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
+	    bytes = 0 
+            for (i = 0; i < data.clients.length;i++){
+                for (j = 0; j < data.clients[i].report.length;j++){
+		    if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
+                        bytes += data.clients[i].report[j][1]["len"]
+                    }
+                    else if (data.clients[i].report[j][0] > k){
+                        break; //Go to next client and don't waste your time.
+                    }
+                }
+	    }	
+	}
+    return (bytes/(k-data.timesteps[0])).toFixed(2)
+    }
+
 //Update The WiFi Table
 function refreshMainTable(data){
     document.getElementById("ap_name").innerHTML = data.monitor_info.essid;
     document.getElementById("ap_usage").innerHTML = "TODO"
     document.getElementById("ap_mac").innerHTML = data.monitor_info.mac;
     document.getElementById("ap_channel").innerHTML = data.monitor_info.channel;
+    //document.getElementById("ap_throughput").innerHTML = getThroughput(data);
 }
 
 //Start monitoring (When user clicks on monitor button)
@@ -349,10 +367,30 @@ function refreshClientGraphs(data){
 		    httpspoints = []
 		    httppoints = []
 		    otherpoints = []
-		    /*for(m = 0; m < clients[i]["report"].length; m++) {
-			report = clients[i]["report"]
+		    var ports = clients[i]["report"][0][1]["ports"]
+		    for(m = 1; m < clients[i]["report"].length; m++) {
+			for(key in clients[i]["report"][m][1]["ports"]) {
+			    if(ports[key] === undefined) {
+				ports[key] = clients[i]["report"][m][1]["ports"][key]
+			    }
+			    else {
+				ports[key] += clients[i]["report"][m][1]["ports"][key]
+			    }
+			}
+			//var report = Object.keys(clients[i]["report"][m][1]["ports"]).map(function(key) { return [key, clients[i]["report"][m][1]["ports"][key]]; });
+			//console.log("Unsorted: " + report);
+			//report.sort(function(first, second) { return second[1] - first[1]; });
+			//console.log("Sorted: " + report);
+			//console.log(clients[i]["report"])
+			//console.log(clients[i]["report"][j][1]["ports"][1])
 			
-		    }*/
+		    }
+		    //console.log(ports)
+		    var report = Object.keys(ports).map(function(key) { return [key, ports[key]]; });
+		    report.sort(function(first, second) { return second[1] - first[1]; });
+		    console.log(report)
+		    topports = [report[0][0], report[1][0], report[2][0]]
+		    console.log(topports)
 		    for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
 			
 			ys = 0;
@@ -367,15 +405,15 @@ function refreshClientGraphs(data){
                             //Y-Axis
                             if (report[j][0] > k-timestep && report[j][0] <= k){
 				//if(!(report[j][1]["ports"]["443"] === undefined)) {
-				ys += report[j][1]["ports"]["443"]
+				ys += report[j][1]["ports"][topports[0]]
 				
 				//}
 				//if(!(report[j][1]["ports"]["80"] === undefined)) {
-				    yh += report[j][1]["ports"]["80"]
+				    yh += report[j][1]["ports"][topports[1]]
 				//}
 				count = 0;
 				for(key in report[j][1]["ports"]) {
-				    if(key != "443" && key  != "80") {
+				    if(key != topports[0] && key  != topports[1]) {
 					count += report[j][1]["ports"][key]
 				    }
 				}
@@ -396,13 +434,13 @@ function refreshClientGraphs(data){
 
 	  	    chartdata = {
 			datasets: [
-			    {label: 'HTTPS',
+			    {label: topports[0],
 			     data: httpspoints,
 			     fill: false,
 			     borderColor: colors.red,
 			     pointRadius: 3},
 			    
-			    {label: 'HTTP',
+			    {label: topports[1],
 			     data: httppoints,
 			     fill: false,
 			     borderColor: colors.blue,
