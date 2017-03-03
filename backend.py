@@ -7,6 +7,8 @@ from IPython import embed
 import cPickle as pickle
 import random
 
+from help import *
+
 
 app = Flask(__name__)
 
@@ -78,6 +80,19 @@ def leaks(client):
         l = None;
 
     return render_template('leaks.html',client = client,leaks=l)
+
+@app.route('/help/<item>')
+def help(item):
+
+    lines = None;
+
+    if (item != "all"):
+        try:
+            lines = help_items[item];
+        except:
+            lines = None;
+
+    return render_template('help.html',item=item,lines=lines,help_items=help_items)
 
 ##########################API CALLS#############################
 # All API Calls                                                #

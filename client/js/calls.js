@@ -231,8 +231,8 @@ function addClient(client){
 
 
 	//Replacing Placeholders
-	//new_client = new_client.replace("XXNAMEXX",client.name)
-	new_client = new_client.replace("XXMACXX",client.mac)
+	new_client = new_client.replace("XXNAMEXX",client.mac.toUpperCase())
+	new_client = new_client.replace("XXMACXX",client.mac.toUpperCase())
 	new_client = new_client.replace("XXIPXX",client.ip)
 	new_client = new_client.replace("XXOSXX",client.os)
 	//new_client.replace("XXUSAGEXX",client.usage) <- TODO
