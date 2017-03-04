@@ -53,7 +53,8 @@ class Client:
             element = self.report[len(self.report)-1][1] #This is a shallow copy        
             
         else:
-            Client.timesteps += [t] #[time.time()]
+            new_timestep = t - (t - Client.timesteps[0])%timestep
+            Client.timesteps += [new_timestep] #[time.time()]
             if self.debug: print "<< Out of Window!"
             #Packet is outside of window size   
             element = copy.deepcopy(self.template)

@@ -147,8 +147,11 @@ def setup():
     dataset.mode = "mon"
     dataset.version = int(random.random()*1000000000)
     #You have to change setup.sh
-    #proc1 =  Popen(["sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["essid"]+":"+dataset.monitor_info["password"]+"'"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
-    #proc1 = Popen(["sudo iwconfig wlan1 channel"+str(c)])
+    #proc = Popen(["sudo iwconfig wlan1 channel"+str(c)])
+    #proc.wait();
+    #proc =  Popen(["sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["essid"]+":"+dataset.monitor_info["password"]+"'"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
+    #time.sleep(5);
+
     print "Moved wlan1 to channel",dataset.monitor_info["channel"]
     print "RUN:","sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["essid"]+":"+dataset.monitor_info["password"]+"'"
     proc2 = Popen(["sudo python packetCapture.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)    
@@ -175,7 +178,20 @@ if __name__ == "__main__":
     #Run setup.sh
 
     if (not TESTING):
+        #proc = Popen(["sudo service avahi-daemon stop"])
+        #proc.wait();
+        #proc = Popen(["sudo service network-manager stop"])
+        #proc.wait();
+        #proc = Popen(["sudo airmon-ng start wlan1"])
+        #proc.wait();
+        #proc = Popen(["sudo python APFind.py])
+        #proc.wait();
+        
+
         proc = Popen(["sudo python APFind.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
+        
+
+        
         #proc = Popen(["sudo python packetCapture.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
     else:
         #proc = Popen(["sudo python APFind.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
