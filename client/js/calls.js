@@ -69,7 +69,6 @@ function getUsage(data){
     recv = recv/8*0.000001
     
     return [sent,recv]
-
 }
 
 
@@ -120,7 +119,6 @@ function prep_monitor_mode(data){
     option.selected = true;
     ap_bar.add(option);
     document.getElementById("setup_pass").value = data.monitor_info.password;
-
 }
 
 
@@ -221,7 +219,6 @@ function refreshClientInfo(data){
 			//Do nothing!
 		}
     }
-
 }
 
 
@@ -523,15 +520,17 @@ function refreshMainGraph(data){
 			upbits = 0 
     		downbits = 0
             for (i = 0; i < data.clients.length;i++){
-                for (j = 0; j < data.clients[i].report.length;j++){
-		            if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
-                        upbits += Number(data.clients[i].report[j][1]["upsize"])
-                        downbits += Number(data.clients[i].report[j][1]["downsize"])
-                    }
-                    else if (data.clients[i].report[j][0] > k){
-                        break; //Go to next client and don't waste your time.
-                    }
-                }
+            	if (data.clients[i].mac != data.monitor_info.mac){
+	                for (j = 0; j < data.clients[i].report.length;j++){
+			            if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
+	                        upbits += Number(data.clients[i].report[j][1]["upsize"])
+	                        downbits += Number(data.clients[i].report[j][1]["downsize"])
+	                    }
+	                    else if (data.clients[i].report[j][0] > k){
+	                        break; //Go to next client and don't waste your time.
+	                    }
+	                }
+	            }
 		    }
 
 		   	//Bits/5seconds = Bits/Second 
@@ -575,10 +574,6 @@ function refreshMainGraph(data){
     //Sent/Recv Graph
     else if (chart_type["main"] == 1){ 
 
-        //Destroy the Previous Chart
-        try{charts["main"].destroy()}
-        catch(err){/*Don't Worry be Happy*/}
-
         sentpoints = []
         recvpoints = []
 
@@ -589,16 +584,18 @@ function refreshMainGraph(data){
             yr = 0;
 
             for (i = 0; i < data.clients.length;i++){
-                for (j = 0; j < data.clients[i].report.length;j++){
+            	if (data.clients[i].mac != data.monitor_info.mac){
+	                for (j = 0; j < data.clients[i].report.length;j++){
 
-                    if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
-                        ys += data.clients[i].report[j][1]["sent"]
-                        yr += data.clients[i].report[j][1]["recv"]
-                    }
-                    else if (data.clients[i].report[j][0] > k){
-                        break; //Go to next client and don't waste your time.
-                    }
-                }
+	                    if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
+	                        ys += data.clients[i].report[j][1]["sent"]
+	                        yr += data.clients[i].report[j][1]["recv"]
+	                    }
+	                    else if (data.clients[i].report[j][0] > k){
+	                        break; //Go to next client and don't waste your time.
+	                    }
+	                }
+	            }
 
             }
 
@@ -636,7 +633,64 @@ function refreshMainGraph(data){
         });
     }
 
+    //Dropped Packets
+    else if (chart_type["main"] == 2){
 
+    	sentpoints = []
+	    recvpoints = []
+
+		for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
+			updrops = 0 
+    		downdrops = 0
+            for (i = 0; i < data.clients.length;i++){
+            	if (data.clients[i].mac != data.monitor_info.mac){
+	                for (j = 0; j < data.clients[i].report.length;j++){
+			            if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
+	                        updrops += Number(data.clients[i].report[j][1]["updrops"])
+	                        downdrops += Number(data.clients[i].report[j][1]["downdrops"])
+	                    }
+	                    else if (data.clients[i].report[j][0] > k){
+	                        break; //Go to next client and don't waste your time.
+	                    }
+	                }
+	            }
+		    }
+
+
+		    sentpoints.push({x: k*1000, y: updrops})
+            recvpoints.push({x: k*1000, y: downdrops})
+		}
+
+
+        chartdata = {
+            datasets: [
+                        {label: 'Upstream Retransmitions',
+                        data: sentpoints,
+                        fill: false,
+                        borderColor: colors.red,
+                        pointRadius: 3},
+
+                        {label: 'Downstream Retransmitions',
+                        data: recvpoints,
+                        fill: false,
+                        borderColor: colors.blue,
+                        pointRadius: 3}
+                    ]
+        }
+
+        opts = options
+        opts.scales.yAxes[0].scaleLabel.labelString = "Average Throughput (Mbits/s)"
+
+        try{charts["main"].destroy()}
+        catch(err){/*Don't Worry be Happy*/}
+
+        charts["main"] = new Chart("mainChart", {
+            type: 'line',
+            data: chartdata,
+            options: options
+        });
+
+    }
 }
 
 
