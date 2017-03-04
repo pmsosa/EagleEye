@@ -90,15 +90,21 @@
 				<table class="table" style="background-color:#f1f1f1">
 					<tr><th colspan="2" style="text-align: center;">Basic Information</th></tr>
 					<tr><th>AP: <a target="_new" href="../help/ESSID"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td id="ap_name">Pretty Fly For a WiFi</td></tr>
-					<tr><th>Est. Usage: </th><td id="ap_usage">20%</td></tr>
+					<tr><th>Total Data Usage (Mb): </th><td id="ap_usage">TODO</td></tr>
 					<tr><th>MAC: <a target="_new" href="../help/MAC"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td id="ap_mac">FF:32:2A:23:44</td></tr>
 					<tr><th>Channel: <a target="_new" href="../help/AP%20Channel"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td id="ap_channel">11</td></tr>				<!--<tr><th>Average Throughput:</th><td id="ap_throughput">10Mbps</td></tr>-->
 				</table>
 			</div>
-			<div class="col-sm-7">
+			<div class="col-sm-6">
 				<div>
 					<canvas id="mainChart"></canvas>
 				</div>
+			</div>
+			<div class="col-sm-2">
+				<label align="center">Graphs</label>
+				<button id="main_toggle_0" class="btn btn-default" onclick="switch_graph('main',0)" style="width:100%" disabled="true">Throughput</button>
+				<button id="main_toggle_1" class="btn btn-default" onclick="switch_graph('main',1)" style="width:100%" disabled="false">Usage</button>
+				<button id="main_toggle_2" class="btn btn-default" onclick="switch_graph('main',2)" style="width:100%">Dropped Packets</button>
 			</div>
 		</div>
 

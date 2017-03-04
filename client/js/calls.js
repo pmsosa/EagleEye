@@ -51,30 +51,34 @@ function AP_update(data){
     mode = "wait"
 }
 
-function getThroughput(data) {
-	for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
-	    bytes = 0 
-            for (i = 0; i < data.clients.length;i++){
-                for (j = 0; j < data.clients[i].report.length;j++){
-		    if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
-                        bytes += data.clients[i].report[j][1]["len"]
-                    }
-                    else if (data.clients[i].report[j][0] > k){
-                        break; //Go to next client and don't waste your time.
-                    }
-                }
-	    }	
-	}
-    return (bytes/(k-data.timesteps[0])).toFixed(2)
-    }
+function getUsage(data){
+
+    sent = 0
+    recv = 0
+
+    //Highly unscalable. But its late and I just want this to work.
+	for (i = 0; i < data.clients.length;i++){
+        for (j = 0; j < data.clients[i].report.length;j++){
+        	if (data.clients[i].mac != data.monitor_info.mac){ //Dont count the router!
+				sent += Number(data.clients[i].report[j][1]["upsize"])
+                recv += Number(data.clients[i].report[j][1]["downsize"])
+            }
+        }
+    } 
+    sent = sent/8*0.000001
+    recv = recv/8*0.000001
+    
+    return [sent,recv]
+
+}
+
 
 //Update The WiFi Table
 function refreshMainTable(data){
     document.getElementById("ap_name").innerHTML = data.monitor_info.essid;
-    document.getElementById("ap_usage").innerHTML = "TODO"
+    document.getElementById("ap_usage").innerHTML = "⬆"+getUsage(data)[0].toFixed(2)+" ⬇"+getUsage(data)[1].toFixed(2);
     document.getElementById("ap_mac").innerHTML = data.monitor_info.mac;
     document.getElementById("ap_channel").innerHTML = data.monitor_info.channel;
-    //document.getElementById("ap_throughput").innerHTML = getThroughput(data);
 }
 
 //Start monitoring (When user clicks on monitor button)
@@ -195,11 +199,13 @@ function refreshClientInfo(data){
     recvtotal = 0;
     ctotal = []; 
     for (i = 0; i < data.clients.length ;i++){
-        for (j = 0; j < data.clients[i].report.length; j++){
-            senttotal += data.clients[i].report[j][1]["sent"]
-            recvtotal += data.clients[i].report[j][1]["recv"]
-        }
-        ctotal.push([senttotal,recvtotal])
+    	if (data.clients[i].mac != data.monitor_info.mac){
+	        for (j = 0; j < data.clients[i].report.length; j++){
+	            senttotal += data.clients[i].report[j][1]["sent"]
+	            recvtotal += data.clients[i].report[j][1]["recv"]
+	        }
+	        ctotal.push([senttotal,recvtotal])
+    	}
     }
     console.log(ctotal);
     console.log(senttotal);
@@ -491,16 +497,83 @@ function switch_graph(mac,type){
     document.getElementById(mac+"_toggle_"+0).disabled = false;
     document.getElementById(mac+"_toggle_"+1).disabled = false;
     document.getElementById(mac+"_toggle_"+2).disabled = false;
-    refreshClientGraphs(dataset);
+
     document.getElementById(mac+"_toggle_"+type).disabled = true;
+
+    if (mac == "main"){
+    	refreshMainGraph(dataset);
+    }
+    else{
+    	refreshClientGraphs(dataset);
+    }
 }
 
 
 //Refresh the Main Graph
 function refreshMainGraph(data){
 
-    
-    if (chart_type["main"] == 0){ 
+
+    //Throughput
+    if (chart_type["main"] == 0){
+
+    	sentpoints = []
+	    recvpoints = []
+
+		for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
+			upbits = 0 
+    		downbits = 0
+            for (i = 0; i < data.clients.length;i++){
+                for (j = 0; j < data.clients[i].report.length;j++){
+		            if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
+                        upbits += Number(data.clients[i].report[j][1]["upsize"])
+                        downbits += Number(data.clients[i].report[j][1]["downsize"])
+                    }
+                    else if (data.clients[i].report[j][0] > k){
+                        break; //Go to next client and don't waste your time.
+                    }
+                }
+		    }
+
+		   	//Bits/5seconds = Bits/Second 
+		   	upbits = (upbits*0.000001)/timestep
+		   	downbits = (downbits*0.000001)/timestep
+
+		    sentpoints.push({x: k*1000, y: upbits/5})
+            recvpoints.push({x: k*1000, y: downbits/5})
+		}
+
+
+        chartdata = {
+            datasets: [
+                        {label: 'Uplink Throughput',
+                        data: sentpoints,
+                        fill: false,
+                        borderColor: colors.red,
+                        pointRadius: 3},
+
+                        {label: 'Downlink Throughput',
+                        data: recvpoints,
+                        fill: false,
+                        borderColor: colors.blue,
+                        pointRadius: 3}
+                    ]
+        }
+
+        opts = options
+        opts.scales.yAxes[0].scaleLabel.labelString = "Average Throughput (Mbits/s)"
+
+        try{charts["main"].destroy()}
+        catch(err){/*Don't Worry be Happy*/}
+
+        charts["main"] = new Chart("mainChart", {
+            type: 'line',
+            data: chartdata,
+            options: options
+        });
+    }
+
+    //Sent/Recv Graph
+    else if (chart_type["main"] == 1){ 
 
         //Destroy the Previous Chart
         try{charts["main"].destroy()}
@@ -515,14 +588,12 @@ function refreshMainGraph(data){
             ys = 0;
             yr = 0;
 
-            //if (fff){console.log("k'--"+k)}
             for (i = 0; i < data.clients.length;i++){
                 for (j = 0; j < data.clients[i].report.length;j++){
 
                     if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
                         ys += data.clients[i].report[j][1]["sent"]
                         yr += data.clients[i].report[j][1]["recv"]
-                        //if (fff){console.log(ys+"-"+data.clients[i].report[j][1]["sent"]+" <"+i+","+j+">")}
                     }
                     else if (data.clients[i].report[j][0] > k){
                         break; //Go to next client and don't waste your time.
@@ -533,7 +604,6 @@ function refreshMainGraph(data){
 
             sentpoints.push({x: k*1000, y: ys})
             recvpoints.push({x: k*1000, y: yr})
-            fff = false
                     
         }
 
@@ -556,15 +626,17 @@ function refreshMainGraph(data){
                     ]
         }
 
+        try{charts["main"].destroy()}
+        catch(err){/*Don't Worry be Happy*/}
 
         charts["main"] = new Chart("mainChart", {
             type: 'line',
             data: chartdata,
             options: options
         });
-
-
     }
+
+
 }
 
 

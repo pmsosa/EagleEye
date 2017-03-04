@@ -23,7 +23,7 @@ class Client:
     timesteps = [] #[time.time()]; #List of shared timesteps done by all points.
     
     #template = {'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'http': 0,'https': 0}
-    template = {'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'ports': {}, 'len': 0}
+    template = {'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'ports': {}, 'upsize': 0, 'downsize' : 0}
     #template = {'timestamp': None, 'sent': 0,'recv': 0,'tcp': 0,'udp': 0,'type':{}}
     # Timewindow must be "static" among clients so the points on the graph match nicely.
     #last_timestamp = [time.time(),time.ctime()] # [Millisecs,Timestamp]
@@ -67,8 +67,12 @@ class Client:
             print "-----------------------"
 
         #Sent or Recieved
-        if (packet.dst == self.mac): element["recv"] +=1
-        elif (packet.src == self.mac): element["sent"] +=1
+        if (packet.dst == self.mac): 
+            element["recv"] +=1
+            element["downsize"] += len(packet)*8   # In Bits
+        elif (packet.src == self.mac): 
+            element["sent"] +=1
+            element["upsize"] += len(packet)*8 # In Bits
 
         #Transport Layer (UDP, TCP)
         if (packet.proto == 6): element["tcp"] +=1
@@ -80,7 +84,7 @@ class Client:
         if (packet.sport in element["ports"]): element["ports"][packet.sport] += 1
         else: element["ports"][packet.sport] = 1
 
-        element["len"] += packet.len
+        
         
         #Check HTTP Leaks
         if (packet.dport == 80):

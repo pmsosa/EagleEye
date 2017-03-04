@@ -197,7 +197,7 @@ if __name__ == "__main__":
         #proc = Popen(["sudo python APFind.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
         dataset.APs = [{"essid":"Fake AP#1","mac":"12:23:34:35","channel":6},{"essid":"Test AP","mac":"AF:22:44:55","channel":1}]
         #r = requests.post("http://localhost:1992/setAPs",headers={'Content-type':'application/json'},data=jsonpickle.encode(data))
-        dataset.monitor_info = {"essid":"Konuko II","mac":"12:23:34:35","channel":"6","password":"vzla-mate"}
+        dataset.monitor_info = {"essid":"Konuko II","mac":"52:54:00:12:35:02","channel":"6","password":"vzla-mate"}
         dataset.mode = "mon"
         proc = Popen(["sudo python packetCapture.py fake"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
         
