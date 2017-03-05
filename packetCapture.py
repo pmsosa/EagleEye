@@ -78,10 +78,12 @@ class Client:
             element["recv"] +=1
             element["downsize"] += len(packet)*8   # In Bits
             try:
-                if (packet.seq in aks[self.mac]["recv"][0] or packet.seq in aks[self.mac]["recv"][1]):
-                    element["downdrops"] += 1
-                else:
-                    aks[self.mac]["recv"][1] += [packet.seq];
+                if (type(p[TCP].payload) != scapy.packet.NoPayload):
+                    if (packet.seq in aks[self.mac]["recv"][0] or packet.seq in aks[self.mac]["recv"][1]):
+                        element["downdrops"] += 1
+                        #print "down",self.mac,[packet.seq],packet.time
+                    else:
+                        aks[self.mac]["recv"][1] += [packet.seq];
             except Exception, e:
                 #print "r",e
                 pass;
@@ -90,10 +92,12 @@ class Client:
             element["sent"] +=1
             element["upsize"] += len(packet)*8 # In Bits
             try:
-                if (packet.seq in aks[self.mac]["sent"][0] or packet.seq in aks[self.mac]["sent"][1]):
-                    element["updrops"] += 1
-                else:
-                    aks[self.mac]["sent"][1] += [packet.seq];
+                if (type(p[TCP].payload) != scapy.packet.NoPayload):
+                    if (packet.seq in aks[self.mac]["sent"][0] or packet.seq in aks[self.mac]["sent"][1]):
+                        element["updrops"] += 1
+                        #print "up",self.mac,[packet.seq],packet.time
+                    else:
+                        aks[self.mac]["sent"][1] += [packet.seq];
             except Exception, e:
                 #print "s",e
                 pass;
