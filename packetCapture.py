@@ -144,7 +144,9 @@ def rec_packet(packet):
             #Add client to our dataset if we haven't seen 'em before.           
             clients_names += [packet.src]
             ##
-            clients += [Client(packet.src,packet.getlayer(IP).src,packet.src,"Unknown")]
+            os = fingerprintOS(packet)
+            clients += [Client(packet.src,packet.getlayer
+(IP).src,packet.src,os)]
         else:
             #Dangreous (but I don't want to do linear search each time)
             clients[clients_names.index(packet.src)].record_packet(packet)
@@ -169,6 +171,25 @@ def rec_packet(packet):
             #traceback.print_exc()
             #if "index" in e: print traceback.print_exc()
             #print packet.show()
+
+
+## Pasive OS fingerprinting based on TCP/IP header file##
+def fingerprintOS(packet):
+    print("Packet info....")
+    packet.show()
+    print("End packet info")
+    osTTLValues = {"Windows": 128, "UNIX": 64}
+    os = "unknown"
+    ttl = packet[IP].ttl
+    length = packet[IP].len
+    if (ttl <= osTTLValues.get("UNIX")):
+        os = "UNIX"
+    else:
+      if ((ttl <= osTTLValues.get("Windows")) and ttl >= (osTTLValues.get("Windows")-5)):
+          os = "Windows"
+    #print(packet[IP].len)
+    print(os)   
+    return os
 
 ## Print Debuggin' Information ##
 def print_debuggin_info():
