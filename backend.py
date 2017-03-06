@@ -5,6 +5,9 @@ from os import path
 import requests
 from IPython import embed
 import cPickle as pickle
+import random
+
+from help import *
 
 
 app = Flask(__name__)
@@ -22,6 +25,7 @@ class Dataset:
                             ## "mon"  = We are actively monitoring an AP
         self.monitor_info = None ## Monitor Info is a tuple: [Selected AP, Password]
         self.timesteps = []
+        self.version = int(random.random()*1000000000) ## Esentially used as a version number for the dataset. If there has been a modification then you change this number
 
 
 TESTING = True #If set to true there will be no data collection just fake data
@@ -77,6 +81,19 @@ def leaks(client):
 
     return render_template('leaks.html',client = client,leaks=l)
 
+@app.route('/help/<item>')
+def help(item):
+
+    lines = None;
+
+    if (item != "all"):
+        try:
+            lines = help_items[item];
+        except:
+            lines = None;
+
+    return render_template('help.html',item=item,lines=lines,help_items=help_items)
+
 ##########################API CALLS#############################
 # All API Calls                                                #
 ################################################################
@@ -101,6 +118,7 @@ def add_Clients():
     temp = jsonpickle.decode(content)
     dataset.clients = temp[0]
     dataset.timesteps = temp[1]
+    dataset.version = int(random.random()*1000000000)
     return "OK"
 
 #Updates the Clients Packet Capture
@@ -110,6 +128,7 @@ def add_APs():
     content = request.get_json(silent=False)
     content = jsonpickle.encode(content)
     dataset.APs = jsonpickle.decode(content)
+    dataset.version = int(random.random()*1000000000)
     return "OK"
 
 # User specifies WLAN name and password
@@ -126,9 +145,13 @@ def setup():
             break;
 
     dataset.mode = "mon"
+    dataset.version = int(random.random()*1000000000)
     #You have to change setup.sh
-    #proc1 =  Popen(["sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["essid"]+":"+dataset.monitor_info["password"]+"'"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
-    #proc1 = Popen(["sudo iwconfig wlan1 channel"+str(c)])
+    #proc = Popen(["sudo iwconfig wlan1 channel"+str(c)])
+    #proc.wait();
+    #proc =  Popen(["sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["essid"]+":"+dataset.monitor_info["password"]+"'"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
+    #time.sleep(5);
+
     print "Moved wlan1 to channel",dataset.monitor_info["channel"]
     print "RUN:","sudo ./dot11decrypt-master/build/dot11decrypt mon0 'wpa:"+dataset.monitor_info["essid"]+":"+dataset.monitor_info["password"]+"'"
     proc2 = Popen(["sudo python packetCapture.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)    
@@ -155,13 +178,26 @@ if __name__ == "__main__":
     #Run setup.sh
 
     if (not TESTING):
+        #proc = Popen(["sudo service avahi-daemon stop"])
+        #proc.wait();
+        #proc = Popen(["sudo service network-manager stop"])
+        #proc.wait();
+        #proc = Popen(["sudo airmon-ng start wlan1"])
+        #proc.wait();
+        #proc = Popen(["sudo python APFind.py])
+        #proc.wait();
+        
+
         proc = Popen(["sudo python APFind.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
+        
+
+        
         #proc = Popen(["sudo python packetCapture.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
     else:
         #proc = Popen(["sudo python APFind.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
         dataset.APs = [{"essid":"Fake AP#1","mac":"12:23:34:35","channel":6},{"essid":"Test AP","mac":"AF:22:44:55","channel":1}]
         #r = requests.post("http://localhost:1992/setAPs",headers={'Content-type':'application/json'},data=jsonpickle.encode(data))
-        dataset.monitor_info = {"essid":"Konuko II","mac":"12:23:34:35","channel":"6","password":"vzla-mate"}
+        dataset.monitor_info = {"essid":"Konuko II","mac":"52:54:00:12:35:02","channel":"6","password":"vzla-mate"}
         dataset.mode = "mon"
         proc = Popen(["sudo python packetCapture.py fake"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
         

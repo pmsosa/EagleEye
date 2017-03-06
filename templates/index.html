@@ -48,7 +48,7 @@
 				 <a href="#" class="dropdown-toggle" data-toggle="dropdown">About<strong class="caret"></strong></a>
 				<ul class="dropdown-menu">
 					<li>
-						<a href="#">Help</a>
+						<a href="../help/all" target="_blank">Help</a>
 					</li>
 					<li>
 						<a href="#">Contact</a>
@@ -84,21 +84,27 @@
 	</div>
 
 	<!-- Main Overall Network Info Section -->
-	<div id="total_container" class="container" style="display:none">
+	<div id="total_container" class="container" style="display:none; background-color:#f1f1f1; border-radius:25px">
 		<div class="row-md-12" style="border-radius:25px">
 			<div class="col-sm-4">
 				<table class="table" style="background-color:#f1f1f1">
 					<tr><th colspan="2" style="text-align: center;">Basic Information</th></tr>
-					<tr><th>AP:</th><td id="ap_name">Pretty Fly For a WiFi</td></tr>
-					<tr><th>Est. Usage:</th><td id="ap_usage">20%</td></tr>
-					<tr><th>MAC:</th><td id="ap_mac">FF:32:2A:23:44</td></tr>
-					<tr><th>Channel:</th><td id="ap_channel">11</td></tr>
+					<tr><th>AP: <a target="_new" href="../help/ESSID"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td id="ap_name">Pretty Fly For a WiFi</td></tr>
+					<tr><th>Total Data Usage (Mb): </th><td id="ap_usage">TODO</td></tr>
+					<tr><th>MAC: <a target="_new" href="../help/MAC"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td id="ap_mac">FF:32:2A:23:44</td></tr>
+					<tr><th>Channel: <a target="_new" href="../help/AP%20Channel"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td id="ap_channel">11</td></tr>				<!--<tr><th>Average Throughput:</th><td id="ap_throughput">10Mbps</td></tr>-->
 				</table>
 			</div>
-			<div class="col-sm-7">
+			<div class="col-sm-6">
 				<div>
 					<canvas id="mainChart"></canvas>
 				</div>
+			</div>
+			<div class="col-sm-2">
+				<label align="center">Graphs</label>
+				<button id="main_toggle_0" class="btn btn-default" onclick="switch_graph('main',0)" style="width:100%" disabled="true">Throughput</button>
+				<button id="main_toggle_1" class="btn btn-default" onclick="switch_graph('main',1)" style="width:100%" disabled="false">Usage</button>
+				<button id="main_toggle_2" class="btn btn-default" onclick="switch_graph('main',2)" style="width:100%">Dropped Packets</button>
 			</div>
 		</div>
 
@@ -127,11 +133,12 @@
 					<div class="col-sm-4">
 						<table class="table" style="background-color:#f6f6f6">
 							<tr><th colspan="2" style="text-align: center;" id="XXXX_name">XXNAMEXX</th></tr>
-							<tr><th>MAC:</th><td id="XXXX_mac">XXMACXX</td></tr>
-							<tr><th>IP:</th><td id="XXXX_ip">XXIPXX</td></tr>
-							<tr><th>OS:</th><td id="XXXX_os">XXOSXX</td></tr>
-							<tr><th>Est. Usage:</th><td id="XXXX_usage">XXUSAGEXX</td></tr>
-							<tr><th>Password Leaks:</th><td><a id="XXXX_leaks" href="../leaks/XXXX" onclick="window.open(this.href,'targetWindow','toolbar=no, location=no, status=no, menubar=no,scrollbars=yes,resizable=yes,width=550px,height=250px'); return false;">None</a></td></tr>
+							<tr><th>MAC: <a target="_new" href="../help/MAC"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td id="XXXX_mac">XXMACXX</td></tr>
+							<tr><th>IP: <a target="_new" href="../help/IP%20Address"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td id="XXXX_ip">XXIPXX</td></tr>
+							<tr><th>OS: <a target="_new" href="../help/OS"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td id="XXXX_os">XXOSXX</td></tr>
+							<tr><th>Upload Usage: <a target="_new" href="../help/Upload%20Usage"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td id="XXXX_UPusage">XXUSAGEXX</td></tr>
+							<tr><th>Download Usage: <a target="_new" href="../help/Download%20Usage"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td id="XXXX_DOWNusage">XXUSAGEXX</td></tr>
+							<tr><th>Password Leaks:  <a target="_new" href="../help/Password%20Leaks"><span class="glyphicon glyphicon-question-sign"></span></a> </th><td><a id="XXXX_leaks" href="../leaks/XXXX" onclick="window.open(this.href,'targetWindow','toolbar=no, location=no, status=no, menubar=no,scrollbars=yes,resizable=yes,width=550px,height=250px'); return false;">None</a></td></tr>
 						</table>				
 					</div>
 					<div class="col-sm-6">

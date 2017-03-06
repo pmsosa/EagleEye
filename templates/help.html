@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+	<head>
+		<link rel="shortcut icon" type="image/png" href="../img/favicon.png"/>
+		<title>Eagle Eye - {{item}} Help</title>
+	</head>
+
+    <body>
+        <div align="center">
+            <h id="foo"><a class="navbar-brand"><img src="/img/favicon.png" style="height:20px; display:inline;"></img> Eagle Eye</a> - <b>{{item}}</b> Help</h>
+        </div>
+
+
+
+
+        {% if item == 'all'%}
+            <div align="center">
+            <table>
+            <tr><th>Keyword</th><th>Explanation</th></tr>
+            {% for  i in help_items %}
+                <tr><td>{{i}}</td><td>
+                {% for l in help_items[i] %}
+                        
+                <p align="justify">{{l}}</p>
+                    
+                {% endfor %}
+                </td></tr>
+            {% endfor %}
+            </table>
+            </div>
+
+        {% elif lines %}
+
+            {% for l in lines %}
+		        <p align="justify">{{l}}</p>
+		    {% endfor %}        
+        
+
+        {% else %}
+            <div align="center">
+                <p>No Help To Display Here!</p>
+            </div>
+        {% endif %}
+
+    </body>
+
+</html>
+
+<style>
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    float: center;
+}
+</style>

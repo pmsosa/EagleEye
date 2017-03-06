@@ -51,10 +51,31 @@ function AP_update(data){
     mode = "wait"
 }
 
+function getUsage(data){
+
+    sent = 0
+    recv = 0
+
+    //Highly unscalable. But its late and I just want this to work.
+	for (i = 0; i < data.clients.length;i++){
+        for (j = 0; j < data.clients[i].report.length;j++){
+        	if (data.clients[i].mac != data.monitor_info.mac){ //Dont count the router!
+				sent += Number(data.clients[i].report[j][1]["upsize"])
+                recv += Number(data.clients[i].report[j][1]["downsize"])
+            }
+        }
+    } 
+    sent = sent/8*0.000001
+    recv = recv/8*0.000001
+    
+    return [sent,recv]
+}
+
+
 //Update The WiFi Table
 function refreshMainTable(data){
     document.getElementById("ap_name").innerHTML = data.monitor_info.essid;
-    document.getElementById("ap_usage").innerHTML = "TODO"
+    document.getElementById("ap_usage").innerHTML = "⬆"+getUsage(data)[0].toFixed(2)+" ⬇"+getUsage(data)[1].toFixed(2);
     document.getElementById("ap_mac").innerHTML = data.monitor_info.mac;
     document.getElementById("ap_channel").innerHTML = data.monitor_info.channel;
 }
@@ -98,7 +119,6 @@ function prep_monitor_mode(data){
     option.selected = true;
     ap_bar.add(option);
     document.getElementById("setup_pass").value = data.monitor_info.password;
-
 }
 
 
@@ -106,6 +126,9 @@ function prep_monitor_mode(data){
 function getAllData(){
 	$.get( getData_endpoint, function( data ) {
 		console.log(data);
+
+        //Don't refresh dataset unless it is necessary
+        if (dataset.version == data.version){ console.log("No new data"); return true;}
 
 		//INIT MODE - Still not doing packet Capturing
 		if (data.mode == "init"){
@@ -156,13 +179,48 @@ function getAllData(){
 
 //Refresh the client information (usage, leaks, etc.)
 function refreshClientInfo(data){
+    
+    //LEAKS
     for (j = 0; j < data.clients.length; j++){
-        c = document.getElementById(data.clients[j].mac+"_leaks");
-        if (data.clients[j].leak.length == 0){ c.innerHTML = "None"}
-        else{c.innerHTML = "⚠️️ Leaks found ("+data.clients[j].leak.length+")"}
+		try{
+        	c = document.getElementById(data.clients[j].mac+"_leaks");
+        	if (data.clients[j].leak.length == 0){ c.innerHTML = "None"}
+        	else{c.innerHTML = "⚠️️ Leaks found ("+data.clients[j].leak.length+")"}
+		}		
+			catch(e){
+			console.log("Leak error at "+data.clients[j].mac+"_leaks");
+			//Do nothing :)
+		}
     }
+    //Usage
+    senttotal = 0;
+    recvtotal = 0;
+    ctotal = []; 
+    for (i = 0; i < data.clients.length ;i++){
+    	if (data.clients[i].mac != data.monitor_info.mac){
+	        for (j = 0; j < data.clients[i].report.length; j++){
+	            senttotal += data.clients[i].report[j][1]["sent"]
+	            recvtotal += data.clients[i].report[j][1]["recv"]
+	        }
+	        ctotal.push([senttotal,recvtotal])
+    	}
+    }
+    console.log(ctotal);
+    console.log(senttotal);
 
+    for (i=0; i < data.clients.length; i++){
+		try{
+        up = document.getElementById(data.clients[i].mac+"_UPusage");
+        dwn = document.getElementById(data.clients[i].mac+"_DOWNusage");
+        up.innerHTML = ((100*ctotal[i][0])/senttotal).toFixed(2)+"%"
+        dwn.innerHTML = ((100*ctotal[i][1])/recvtotal).toFixed(2)+"%";
+		}
+		catch(e){
+			//Do nothing!
+		}
+    }
 }
+
 
 //Add a client to the front-end
 function addClient(client){
@@ -176,8 +234,8 @@ function addClient(client){
 
 
 	//Replacing Placeholders
-	//new_client = new_client.replace("XXNAMEXX",client.name)
-	new_client = new_client.replace("XXMACXX",client.mac)
+	new_client = new_client.replace("XXNAMEXX",client.mac.toUpperCase())
+	new_client = new_client.replace("XXMACXX",client.mac.toUpperCase())
 	new_client = new_client.replace("XXIPXX",client.ip)
 	new_client = new_client.replace("XXOSXX",client.os)
 	//new_client.replace("XXUSAGEXX",client.usage) <- TODO
@@ -318,9 +376,108 @@ function refreshClientGraphs(data){
 		
 		//Chart Type: 3 - Portwise Chart
 		else if (chart_type[clients[i].mac] == 2){
-			//DO THIS PORTWISE
-			//PICK TOP PORTS, otherwise it'll be impossible to read.
+		    //DO THIS PORTWISE
+		    //PICK TOP PORTS, otherwise it'll be impossible to read.
+		    httpspoints = []
+		    httppoints = []
+		    otherpoints = []
+		    var ports = clients[i]["report"][0][1]["ports"]
+		    for(m = 1; m < clients[i]["report"].length; m++) {
+			for(key in clients[i]["report"][m][1]["ports"]) {
+			    if(ports[key] === undefined) {
+				ports[key] = clients[i]["report"][m][1]["ports"][key]
+			    }
+			    else {
+				ports[key] += clients[i]["report"][m][1]["ports"][key]
+			    }
+			}
+			//var report = Object.keys(clients[i]["report"][m][1]["ports"]).map(function(key) { return [key, clients[i]["report"][m][1]["ports"][key]]; });
+			//console.log("Unsorted: " + report);
+			//report.sort(function(first, second) { return second[1] - first[1]; });
+			//console.log("Sorted: " + report);
+			//console.log(clients[i]["report"])
+			//console.log(clients[i]["report"][j][1]["ports"][1])
+			
+		    }
+		    //console.log(ports)
+		    var report = Object.keys(ports).map(function(key) { return [key, ports[key]]; });
+		    report.sort(function(first, second) { return second[1] - first[1]; });
+		    console.log(report)
+		    topports = [report[0][0], report[1][0], report[2][0]]
+		    console.log(topports)
+		    for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
+			
+			ys = 0;
+			yh = 0;
+			yo = 0;
+			for (j = 0; j < clients[i]["report"].length; j++){
+			    //if (clients[i]["mac"] != ap_essid){
+                            report = clients[i]["report"]
+                            //X-Axis
+                            //time = new Date(report[j][0]*1000)
+
+                            //Y-Axis
+                            if (report[j][0] > k-timestep && report[j][0] <= k){
+				//if(!(report[j][1]["ports"]["443"] === undefined)) {
+				ys += report[j][1]["ports"][topports[0]]
+				
+				//}
+				//if(!(report[j][1]["ports"]["80"] === undefined)) {
+				    yh += report[j][1]["ports"][topports[1]]
+				//}
+				count = 0;
+				for(key in report[j][1]["ports"]) {
+				    if(key != topports[0] && key  != topports[1]) {
+					count += report[j][1]["ports"][key]
+				    }
+				}
+				yo += count
+				//ys += count
+				//yh += count
+                            }
+                            else if (report[j][0] > k){
+				break;
+                            }
+			}
+
+			httpspoints.push({x: k*1000, y: ys})
+			httppoints.push({x: k*1000, y: yh})
+			otherpoints.push({x: k*1000, y: yo})
+
+		    }
+
+	  	    chartdata = {
+			datasets: [
+			    {label: topports[0],
+			     data: httpspoints,
+			     fill: false,
+			     borderColor: colors.red,
+			     pointRadius: 3},
+			    
+			    {label: topports[1],
+			     data: httppoints,
+			     fill: false,
+			     borderColor: colors.blue,
+			     pointRadius: 3},
+
+			    {label: 'Other',
+			     data: otherpoints,
+			     fill: false,
+			     borderColor: colors.green,
+			     pointRadius: 3}
+			]
+		    }
+		    try{charts[clients[i].mac].destroy()}
+		    catch(err){/*Don't Worry be Happy*/}
+
+
+		    charts[clients[i].mac] = new Chart(clients[i].mac+"_chart", {
+		    type: 'line',
+		    data: chartdata,
+		    options: options
+		    });
 		}
+	   
 
 		//Chart Type: 4 - Portwise Chart
 		else{
@@ -339,18 +496,83 @@ function switch_graph(mac,type){
     document.getElementById(mac+"_toggle_"+2).disabled = false;
 
     document.getElementById(mac+"_toggle_"+type).disabled = true;
+
+    if (mac == "main"){
+    	refreshMainGraph(dataset);
+    }
+    else{
+    	refreshClientGraphs(dataset);
+    }
 }
 
 
 //Refresh the Main Graph
 function refreshMainGraph(data){
 
-    
-    if (chart_type["main"] == 0){ 
 
-        //Destroy the Previous Chart
+    //Throughput
+    if (chart_type["main"] == 0){
+
+    	sentpoints = []
+	    recvpoints = []
+
+		for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
+			upbits = 0 
+    		downbits = 0
+            for (i = 0; i < data.clients.length;i++){
+            	if (data.clients[i].mac != data.monitor_info.mac){
+	                for (j = 0; j < data.clients[i].report.length;j++){
+			            if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
+	                        upbits += Number(data.clients[i].report[j][1]["upsize"])
+	                        downbits += Number(data.clients[i].report[j][1]["downsize"])
+	                    }
+	                    else if (data.clients[i].report[j][0] > k){
+	                        break; //Go to next client and don't waste your time.
+	                    }
+	                }
+	            }
+		    }
+
+		   	//Bits/5seconds = Bits/Second 
+		   	upbits = (upbits*0.000001)/timestep
+		   	downbits = (downbits*0.000001)/timestep
+
+		    sentpoints.push({x: k*1000, y: upbits/5})
+            recvpoints.push({x: k*1000, y: downbits/5})
+		}
+
+
+        chartdata = {
+            datasets: [
+                        {label: 'Uplink Throughput',
+                        data: sentpoints,
+                        fill: false,
+                        borderColor: colors.red,
+                        pointRadius: 3},
+
+                        {label: 'Downlink Throughput',
+                        data: recvpoints,
+                        fill: false,
+                        borderColor: colors.blue,
+                        pointRadius: 3}
+                    ]
+        }
+
+        opts = options
+        opts.scales.yAxes[0].scaleLabel.labelString = "Average Throughput (Mbits/s)"
+
         try{charts["main"].destroy()}
         catch(err){/*Don't Worry be Happy*/}
+
+        charts["main"] = new Chart("mainChart", {
+            type: 'line',
+            data: chartdata,
+            options: options
+        });
+    }
+
+    //Sent/Recv Graph
+    else if (chart_type["main"] == 1){ 
 
         sentpoints = []
         recvpoints = []
@@ -361,25 +583,24 @@ function refreshMainGraph(data){
             ys = 0;
             yr = 0;
 
-            //if (fff){console.log("k'--"+k)}
             for (i = 0; i < data.clients.length;i++){
-                for (j = 0; j < data.clients[i].report.length;j++){
+            	if (data.clients[i].mac != data.monitor_info.mac){
+	                for (j = 0; j < data.clients[i].report.length;j++){
 
-                    if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
-                        ys += data.clients[i].report[j][1]["sent"]
-                        yr += data.clients[i].report[j][1]["recv"]
-                        //if (fff){console.log(ys+"-"+data.clients[i].report[j][1]["sent"]+" <"+i+","+j+">")}
-                    }
-                    else if (data.clients[i].report[j][0] > k){
-                        break; //Go to next client and don't waste your time.
-                    }
-                }
+	                    if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
+	                        ys += data.clients[i].report[j][1]["sent"]
+	                        yr += data.clients[i].report[j][1]["recv"]
+	                    }
+	                    else if (data.clients[i].report[j][0] > k){
+	                        break; //Go to next client and don't waste your time.
+	                    }
+	                }
+	            }
 
             }
 
             sentpoints.push({x: k*1000, y: ys})
             recvpoints.push({x: k*1000, y: yr})
-            fff = false
                     
         }
 
@@ -402,13 +623,72 @@ function refreshMainGraph(data){
                     ]
         }
 
+        try{charts["main"].destroy()}
+        catch(err){/*Don't Worry be Happy*/}
 
         charts["main"] = new Chart("mainChart", {
             type: 'line',
             data: chartdata,
             options: options
         });
+    }
 
+    //Dropped Packets
+    else if (chart_type["main"] == 2){
+
+    	sentpoints = []
+	    recvpoints = []
+
+		for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
+			updrops = 0 
+    		downdrops = 0
+            for (i = 0; i < data.clients.length;i++){
+            	if (data.clients[i].mac != data.monitor_info.mac){
+	                for (j = 0; j < data.clients[i].report.length;j++){
+			            if (data.clients[i].report[j][0] > k-timestep && data.clients[i].report[j][0] <= k){
+	                        updrops += Number(data.clients[i].report[j][1]["updrops"])
+	                        downdrops += Number(data.clients[i].report[j][1]["downdrops"])
+	                    }
+	                    else if (data.clients[i].report[j][0] > k){
+	                        break; //Go to next client and don't waste your time.
+	                    }
+	                }
+	            }
+		    }
+
+
+		    sentpoints.push({x: k*1000, y: updrops})
+            recvpoints.push({x: k*1000, y: downdrops})
+		}
+
+
+        chartdata = {
+            datasets: [
+                        {label: 'Upstream Retransmitions',
+                        data: sentpoints,
+                        fill: false,
+                        borderColor: colors.red,
+                        pointRadius: 3},
+
+                        {label: 'Downstream Retransmitions',
+                        data: recvpoints,
+                        fill: false,
+                        borderColor: colors.blue,
+                        pointRadius: 3}
+                    ]
+        }
+
+        opts = options
+        opts.scales.yAxes[0].scaleLabel.labelString = "Average Throughput (Mbits/s)"
+
+        try{charts["main"].destroy()}
+        catch(err){/*Don't Worry be Happy*/}
+
+        charts["main"] = new Chart("mainChart", {
+            type: 'line',
+            data: chartdata,
+            options: options
+        });
 
     }
 }
