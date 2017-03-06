@@ -558,7 +558,7 @@ function refreshMainGraph(data){
                     ]
         }
 
-        opts = options
+        opts = jQuery.extend(true, {}, options);
         opts.scales.yAxes[0].scaleLabel.labelString = "Average Throughput (Mbits/s)"
 
         try{charts["main"].destroy()}
@@ -567,7 +567,7 @@ function refreshMainGraph(data){
         charts["main"] = new Chart("mainChart", {
             type: 'line',
             data: chartdata,
-            options: options
+            options: opts
         });
     }
 
@@ -678,8 +678,6 @@ function refreshMainGraph(data){
                     ]
         }
 
-        opts = options
-        opts.scales.yAxes[0].scaleLabel.labelString = "Average Throughput (Mbits/s)"
 
         try{charts["main"].destroy()}
         catch(err){/*Don't Worry be Happy*/}
