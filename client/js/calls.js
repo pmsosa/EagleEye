@@ -378,70 +378,60 @@ function refreshClientGraphs(data){
 		else if (chart_type[clients[i].mac] == 2){
 		    //DO THIS PORTWISE
 		    //PICK TOP PORTS, otherwise it'll be impossible to read.
-		    httpspoints = []
-		    httppoints = []
+		    no1points = []
+		    no2points = []
+		    no3points = []
 		    otherpoints = []
 		    var ports = clients[i]["report"][0][1]["ports"]
-		    for(m = 1; m < clients[i]["report"].length; m++) {
-			for(key in clients[i]["report"][m][1]["ports"]) {
-			    if(ports[key] === undefined) {
-				ports[key] = clients[i]["report"][m][1]["ports"][key]
-			    }
-			    else {
-				ports[key] += clients[i]["report"][m][1]["ports"][key]
+		    for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
+			for(m = 1; m < clients[i]["report"].length; m++) {
+			    if (clients[i]["report"][m][0] > k-timestep && clients[i]["report"][m][0] <= k){
+				for(key in clients[i]["report"][m][1]["ports"]) {
+				    if(ports[key] === undefined) {
+					ports[key] = clients[i]["report"][m][1]["ports"][key]
+				    }
+				    else {
+					ports[key] += clients[i]["report"][m][1]["ports"][key]
+				    }
+				}
 			    }
 			}
-			//var report = Object.keys(clients[i]["report"][m][1]["ports"]).map(function(key) { return [key, clients[i]["report"][m][1]["ports"][key]]; });
-			//console.log("Unsorted: " + report);
-			//report.sort(function(first, second) { return second[1] - first[1]; });
-			//console.log("Sorted: " + report);
-			//console.log(clients[i]["report"])
-			//console.log(clients[i]["report"][j][1]["ports"][1])
-			
 		    }
-		    //console.log(ports)
+
 		    var report = Object.keys(ports).map(function(key) { return [key, ports[key]]; });
 		    report.sort(function(first, second) { return second[1] - first[1]; });
-		    console.log(report)
 		    topports = [report[0][0], report[1][0], report[2][0]]
-		    console.log(topports)
+
 		    for (k = data.timesteps[0]+timestep; k < data.timesteps[data.timesteps.length-1]+timestep; k=k+timestep){
 			
-			ys = 0;
-			yh = 0;
+			y1 = 0;
+			y2 = 0;
+			y3 = 0;
 			yo = 0;
 			for (j = 0; j < clients[i]["report"].length; j++){
-			    //if (clients[i]["mac"] != ap_essid){
                             report = clients[i]["report"]
-                            //X-Axis
-                            //time = new Date(report[j][0]*1000)
 
-                            //Y-Axis
                             if (report[j][0] > k-timestep && report[j][0] <= k){
-				//if(!(report[j][1]["ports"]["443"] === undefined)) {
-				ys += report[j][1]["ports"][topports[0]]
-				
-				//}
-				//if(!(report[j][1]["ports"]["80"] === undefined)) {
-				    yh += report[j][1]["ports"][topports[1]]
-				//}
+				y1 += report[j][1]["ports"][topports[0]]
+				y2 += report[j][1]["ports"][topports[1]]
+				y3 += report[j][1]["ports"][topports[2]]
+
 				count = 0;
 				for(key in report[j][1]["ports"]) {
-				    if(key != topports[0] && key  != topports[1]) {
+				    if(key != topports[0] && key  != topports[1]&& key != topports[2]) {
 					count += report[j][1]["ports"][key]
 				    }
 				}
 				yo += count
-				//ys += count
-				//yh += count
                             }
                             else if (report[j][0] > k){
 				break;
                             }
 			}
 
-			httpspoints.push({x: k*1000, y: ys})
-			httppoints.push({x: k*1000, y: yh})
+			no1points.push({x: k*1000, y: y1})
+			no2points.push({x: k*1000, y: y2})
+			no3points.push({x: k*1000, y: y3})
 			otherpoints.push({x: k*1000, y: yo})
 
 		    }
@@ -449,21 +439,27 @@ function refreshClientGraphs(data){
 	  	    chartdata = {
 			datasets: [
 			    {label: topports[0],
-			     data: httpspoints,
+			     data: no1points,
 			     fill: false,
 			     borderColor: colors.red,
 			     pointRadius: 3},
 			    
 			    {label: topports[1],
-			     data: httppoints,
+			     data: no2points,
 			     fill: false,
 			     borderColor: colors.blue,
+			     pointRadius: 3},
+
+			     {label: topports[2],
+			     data: no3points,
+			     fill: false,
+			     borderColor: colors.green,
 			     pointRadius: 3},
 
 			    {label: 'Other',
 			     data: otherpoints,
 			     fill: false,
-			     borderColor: colors.green,
+			     borderColor: colors.black,
 			     pointRadius: 3}
 			]
 		    }
