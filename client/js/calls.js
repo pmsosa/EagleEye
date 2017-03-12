@@ -490,6 +490,7 @@ function switch_graph(mac,type){
     document.getElementById(mac+"_toggle_"+0).disabled = false;
     document.getElementById(mac+"_toggle_"+1).disabled = false;
     document.getElementById(mac+"_toggle_"+2).disabled = false;
+    document.getElementById(mac+"_toggle_"+3).disabled = false;
 
     document.getElementById(mac+"_toggle_"+type).disabled = true;
 
@@ -685,6 +686,64 @@ function refreshMainGraph(data){
         });
 
     }
+
+    //2.4GHz Spectrum Usage Chart
+    else if (chart_type["main"] == 3){
+
+    	datasets = []
+    	col = colors.red
+
+    	for (k = 0; k < data.APs.length; k++){
+    		if (data.APs[k]["mac"] == data.monitor_info["mac"]){ col = colors.green} 
+    			else{ col = colors.red}
+
+    			datasets.push({
+    				label: data.APs[k]["essid"],
+    				data: [{x:data.APs[k]["channel"], y: Number(100+(data.APs[k]["pwr"])),r:3}],
+    				fill: true,
+    				borderColor: col,
+    				pointRadius: 4
+    			})
+    	}
+
+        chartdata = { datasets: datasets }
+
+
+        try{charts["main"].destroy()}
+        catch(err){/*Don't Worry be Happy*/}
+
+        charts["main"] = new Chart("mainChart", {
+            type: 'bubble',
+            data: chartdata,
+            options: {
+            	scales:{
+            		xAxes:[{
+            			ticks:{
+            				min: 1,
+            				max: 13,
+            				stepSize: 1
+            			},
+            			scaleLabel:{
+            				display:true,
+            				labelString:"Channels"
+            			}
+            		}],
+            		yAxes:[{
+            			scaleLabel:{
+            				display:true,
+            				labelString:"Power (-dBi)"
+            			},
+            			ticks:{
+            				min: 0,
+            				max: 100,
+            				stepSize: 10
+            			}
+            		}]
+            	}
+            }
+        });
+    }
+
 }
 
 
