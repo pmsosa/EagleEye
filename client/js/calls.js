@@ -486,18 +486,23 @@ function refreshClientGraphs(data){
 
 //Button binding function to switch type of graph.
 function switch_graph(mac,type){
+	console.log("click!")
     chart_type[mac] = type;
     document.getElementById(mac+"_toggle_"+0).disabled = false;
     document.getElementById(mac+"_toggle_"+1).disabled = false;
     document.getElementById(mac+"_toggle_"+2).disabled = false;
-    document.getElementById(mac+"_toggle_"+3).disabled = false;
-
+    try{
+    	document.getElementById(mac+"_toggle_"+3).disabled = false;
+	}
+	catch(err){/*Don't Worry*/}
     document.getElementById(mac+"_toggle_"+type).disabled = true;
 
     if (mac == "main"){
+    	console.log("ref_main")
     	refreshMainGraph(dataset);
     }
     else{
+    	console.log("ref_client")
     	refreshClientGraphs(dataset);
     }
 }
