@@ -197,27 +197,27 @@ function refreshClientInfo(data){
     recvtotal = 0;
     ctotal = []; 
     for (i = 0; i < data.clients.length ;i++){
+    	client_sent = 0
+    	client_recv = 0
     	if (data.clients[i].mac != data.monitor_info.mac){
 	        for (j = 0; j < data.clients[i].report.length; j++){
-	            senttotal += data.clients[i].report[j][1]["sent"]
-	            recvtotal += data.clients[i].report[j][1]["recv"]
+	            client_sent += data.clients[i].report[j][1]["sent"]
+	            client_recv += data.clients[i].report[j][1]["recv"]
 	        }
-	        ctotal.push([senttotal,recvtotal])
+	        ctotal.push([data.clients[i].mac,client_sent,client_recv])
+    		senttotal += client_sent
+    		recvtotal += client_recv
     	}
     }
-    console.log(ctotal);
+    console.warn(ctotal);
     console.log(senttotal);
 
-    for (i=0; i < data.clients.length; i++){
-		try{
-        up = document.getElementById(data.clients[i].mac+"_UPusage");
-        dwn = document.getElementById(data.clients[i].mac+"_DOWNusage");
-        up.innerHTML = ((100*ctotal[i][0])/senttotal).toFixed(2)+"%"
-        dwn.innerHTML = ((100*ctotal[i][1])/recvtotal).toFixed(2)+"%";
-		}
-		catch(e){
-			//Do nothing!
-		}
+    for (i=0; i < ctotal.length; i++){
+		console.log("hoola  "+ ctotal[i][0]);
+        up = document.getElementById(ctotal[i][0]+"_UPusage");
+        dwn = document.getElementById(ctotal[i][0]+"_DOWNusage");
+        up.innerHTML = ((100*ctotal[i][1])/senttotal).toFixed(2)+"%";
+        dwn.innerHTML = ((100*ctotal[i][2])/recvtotal).toFixed(2)+"%";
     }
 }
 

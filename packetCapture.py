@@ -7,13 +7,15 @@ import traceback
 url = "http://localhost:1992"
 endpoint = "setPacketCaptr"
 iface = "tap0"
-timeout = 120 # For unlimited time set = None
+timeout = 50000 # For unlimited time set = None
 
 timestep = 5 # 5 Seconds (Equivalent to the granularity of the graphs)
 clients = []
 clients_names = []
 aks = {}
 debug = False
+
+multicast_addrs = ["01:00:5e:7f:ff:fa","01:00:5e:00:00:fb","01:00:5e:00:00:fc","ff:ff:ff:ff:ff:ff"]
 
 
 
@@ -78,7 +80,7 @@ class Client:
             element["recv"] +=1
             element["downsize"] += len(packet)*8   # In Bits
             try:
-                if (type(p[TCP].payload) != scapy.packet.NoPayload):
+                if (type(packet[TCP].payload) != scapy.packet.NoPayload):
                     if (packet.seq in aks[self.mac]["recv"][0] or packet.seq in aks[self.mac]["recv"][1]):
                         element["downdrops"] += 1
                         #print "down",self.mac,[packet.seq],packet.time
@@ -92,7 +94,7 @@ class Client:
             element["sent"] +=1
             element["upsize"] += len(packet)*8 # In Bits
             try:
-                if (type(p[TCP].payload) != scapy.packet.NoPayload):
+                if (type(packet[TCP].payload) != scapy.packet.NoPayload):
                     if (packet.seq in aks[self.mac]["sent"][0] or packet.seq in aks[self.mac]["sent"][1]):
                         element["updrops"] += 1
                         #print "up",self.mac,[packet.seq],packet.time
@@ -189,6 +191,9 @@ def rec_packet(packet):
 
         # -------| Record Source |-------
         if packet.src not in clients_names:
+            #Don't save multicast addresses (src should never happen)
+            if packet.src in multicast_addrs:
+                return;
             #Add client to our dataset if we haven't seen 'em before.           
             clients_names += [packet.src]
             ##
@@ -202,6 +207,9 @@ def rec_packet(packet):
             
         # -------| Record Destination |-------
         if packet.dst not in clients_names:
+            #Don't save multicast addresses (this is possible)
+            if packet.dst in multicast_addrs:
+                return;
             #Add client to our dataset if we haven't seen 'em before.   
             clients_names += [packet.dst]
             clients += [Client(packet.dst,packet.getlayer(IP).src,packet.src,"Unknown")]
@@ -262,7 +270,7 @@ def upload_data():
 if __name__ == "__main__":
     if "fake" in sys.argv:
         #Fake Monitor - 
-        capture = "capture_examples/kaleo.pcap" #WARNING: PCAP FILES ONLY. (Timing will be off if you are using pcapng files.)
+        capture = "file.pcap" #WARNING: PCAP FILES ONLY. (Timing will be off if you are using pcapng files.)
         fake_monitor(600,capture)
     else:
         monitor(timeout,iface)

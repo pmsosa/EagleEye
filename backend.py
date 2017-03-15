@@ -205,7 +205,7 @@ if __name__ == "__main__":
         #proc = Popen(["sudo python APFind.py"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
         dataset.APs = [{'mac': '20:e5:2a:fa:8f:e8', 'pwr': -74, 'essid': 'FA8FE8', 'channel': 5}, {'mac': '54:3d:37:28:bb:08', 'pwr': -64, 'essid': 'ICON-MGMT', 'channel': 3}, {'mac': '54:3d:37:28:6e:d8', 'pwr': -69, 'essid': 'ICON-MGMT', 'channel': 6}, {'mac': '54:3d:37:68:6e:d8', 'pwr': -63, 'essid': 'ICON', 'channel': 1}, {'mac': '54:3d:37:29:54:d8', 'pwr': -70, 'essid': 'ICON-MGMT', 'channel': 1}, {'mac': '60:e3:27:ac:58:f4', 'pwr': -25, 'essid': 'BlueMix', 'channel': 11}, {'mac': '54:3d:37:28:ba:b8', 'pwr': -75, 'essid': 'ICON-MGMT', 'channel': 6}, {'mac': '54:3d:37:68:ba:b8', 'pwr': -73, 'essid': 'ICON', 'channel': 6}, {'mac': '54:3d:37:68:bb:08', 'pwr': -71, 'essid': 'ICON', 'channel': 7}, {'mac': '54:3d:37:69:54:d8', 'pwr': -72, 'essid': 'ICON', 'channel': 11}, {'mac': '00:24:a5:d9:2d:03', 'pwr': -91, 'essid': '<hidden>', 'channel': 11}]
         #r = requests.post("http://localhost:1992/setAPs",headers={'Content-type':'application/json'},data=jsonpickle.encode(data))
-        dataset.monitor_info = {"essid":"Konuko II","mac":"52:54:00:12:35:02","channel":"6","password":"vzla-mate"}
+        dataset.monitor_info = {"essid":"Konuko II","mac":"60:e3:27:ac:58:f4","channel":"6","password":"vzla-mate"}
         #dataset.mode = "mon"
         dataset.version = int(random.random()*1000000000)
         #proc = Popen(["sudo python packetCapture.py fake"],shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
