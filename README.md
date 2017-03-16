@@ -4,6 +4,7 @@
 <h3>Goal</h3>
 Simple and easy to use wireless managment software that will allow non-technical "sysadmins" to understand how their networks are being used.
 
+![EagleEye](http://konukoii.com/blog/wp-content/uploads/2017/03/eagle_eye_screenshot.png)
 
 <h3>Requirements</h3>
 Run the following commands to install prerequisites:
