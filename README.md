@@ -18,6 +18,7 @@ You will also need: (*check on both links to see how to build).
  
 
 <h3>How to Run</h3>
+
 **Tested with following Environment:**
 - OS: Linux Mint 17.2 'Rafaela' (Mate 32-bit)
 - Wireless Adapter: TP-Link TL-WN722N (High Gain 150Mbps) [wlan1]
@@ -36,6 +37,7 @@ You will also need: (*check on both links to see how to build).
 - On packetCapture.py, set ```capture = "<some path to a .pcap capture file>```.
 
 <h3>Code Division</h3>
+
 - backend.py: Runs a flask server listening on localhost:1992 it recieves requests from the client (get data) and data from the APFind and packetCapture scripts (post data).
 - APFind.py: Find APs and then upload to localhost:1992
 - packetCapture.py: Capture packets (or read from a pcap file), parsing the important info and uploading to localhost:1992
@@ -47,6 +49,7 @@ You will also need: (*check on both links to see how to build).
 <br/>
 <hr>
 <h3>Overall Idea</h3>
+
 - First we put our wireless interface in promiscuos mode (meaning it is authenticated to an AP, but we can still read all the other packets from other authenticated users to the same AP).
 - We use dot11decrypt to decrypt packets that our interface is reading. These decrypted packets are dropped into a new interaface called TAP0.
 - We then use python's library: scapy to read from TAP0.
