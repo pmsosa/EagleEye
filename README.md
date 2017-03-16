@@ -7,11 +7,13 @@ Simple and easy to use wireless managment software that will allow non-technical
 
 <h3>Requirements</h3>
 Run the following commands to install prerequisites:
+
 ```
 apt-get update
 sudo apt-get install python python-pip libboost-all-dev libpcap-dev libssl-dev cmake g++ 
 sudo -H pip install -r requirements.txt
 ```
+
 You will also need: (*check on both links to see how to build).
  - libtins: https://github.com/mfontanini/libtins
  - dot11decrypt: https://github.com/mfontanini/dot11decrypt
